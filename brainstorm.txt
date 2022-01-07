@@ -5,3 +5,16 @@ todo:
 - settup git on windows lenovo
 - settup git on linux lenovo
 
+- confirm decklist source
+- confirm decklist format
+
+- amass initial decklists
+
+
+SPECIFICATIONS:
+will not deal with sideboarding
+decks sourced from : https://mtgdecks.net/Modern
+
+
+
+
