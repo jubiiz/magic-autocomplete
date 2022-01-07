@@ -1,0 +1,7 @@
+brainstorm file for the project
+
+todo:
+- settup git on desktop
+- settup git on windows lenovo
+- settup git on linux lenovo
+
