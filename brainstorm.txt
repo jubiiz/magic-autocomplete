@@ -10,6 +10,16 @@ todo:
 
 - amass initial decklists
 
+Probable decklist format: 
+    - one card per line
+    - all lower cap
+    - spaces as "_"
+
+
+first 10 decklist types:
+    must not have sideboard particularity (like ktcg karn)
+    must be fairly redundant lists (not like wubrg control)
+    
 
 SPECIFICATIONS:
 will not deal with sideboarding
