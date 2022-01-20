@@ -14,8 +14,6 @@ Probable decklist format:
     - no sb
 
 
-first 20 decklist types:
-    must not have sideboard particularity (like ktcg karn)
     
 
 SPECIFICATIONS:
