@@ -1,10 +1,13 @@
 brainstorm file for the project
 
 todo:
-- settup git on desktop
-- amass initial decklists
-- save links
 - format lists
+- learn how to vectorize non-numeric input
+- create list of unique cards?
+- create vectorized inputs from lists
+- learn how to create and use LSTM networks from Tensorflow
+- build and train model on formated lists
+- predict lists
 
 Probable decklist format: 
     - one card per line
