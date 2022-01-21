@@ -53,6 +53,7 @@ def get_links(current):
             link, 
             if link.find("http") == -1:
                 frontier.append("http://mtggoldfish.com"+link)
+                # THIS DOESNT WORK: BECAUSE OF LACK OF #PAPER AT THE END??
             else:
                 frontier.append(link)
         html_texts += htmls

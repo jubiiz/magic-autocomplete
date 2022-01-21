@@ -36,8 +36,8 @@ def get_links(current):
 def main():
     urllib3.disable_warnings()
     # name of the folder that will be created and contain the archetype of list current
-    name = "HammerTime"
-    current = "https://www.mtggoldfish.com/archetype/modern-hammer-time/decks" # there might be issues with the long weird name (try initial = one of the side ones) 
+    name = "MonoUTron"
+    current = "https://www.mtggoldfish.com/archetype/mono-blue-tron/decks" # there might be issues with the long weird name (try initial = one of the side ones) 
     # should try from here: https://www.mtggoldfish.com/archetype/modern-hammer-time/decks
 
     links, html_texts = get_links(current)
