@@ -14,7 +14,7 @@ Probable decklist format:
     - all lower cap
     - spaces as "_"
     - randomized
-    - no sb
+    X no sb 
 
 
     
