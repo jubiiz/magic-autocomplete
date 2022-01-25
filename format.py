@@ -39,6 +39,9 @@ def main():
                         singles.append(cardname)
                     for i in range(int(num)):
                         cards.append(cardname)
+    
+
+            """
             # randomize the list
             len_list = len(cards)
             cards.sort(key=lambda c: random.randrange(len_list))
@@ -46,6 +49,7 @@ def main():
             # append formated list to new path
             f_archetype_path = f"{f_lists_path}{os.sep}{archetype_name}"
 
+            
             # creates archetype if it's the first list of the archetype
             if decklist_name == "0":
                 try:
@@ -59,7 +63,12 @@ def main():
                 for card in cards:
                     w.write(card)
                     w.write("\n")
-
+            """
+    # once all lists have been looked at, add all singles to a file
+    with open("f_singles.txt", "w") as w:
+        for card in singles:
+            w.write(card)
+            w.write("\n")
 
 if __name__ == "__main__":
     main()
