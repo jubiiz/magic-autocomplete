@@ -1,7 +1,6 @@
 brainstorm file for the project
 
 todo:
-- format lists
 - learn how to vectorize non-numeric input
 - create list of unique cards?
 - create vectorized inputs from lists
@@ -9,13 +8,21 @@ todo:
 - build and train model on formated lists
 - predict lists
 
-Probable decklist format: 
+decklist format: 
     - one card per line
     - all lower cap
     - spaces as "_"
     - randomized
     X no sb 
 
+
+input vectorization: 
+    probably with word2vec CBOW: https://www.youtube.com/watch?v=UqRCEmrv1gQ 
+        - faster and better for small corpuses (source to find)
+
+    probable method:
+    - load list of all lists into memory, each individual card being a list item
+    model = Word2Vec(modern_meta, min_count=1, size=16)
 
     
 
