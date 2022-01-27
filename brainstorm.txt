@@ -24,6 +24,9 @@ input vectorization:
     - load list of all lists into memory, each individual card being a list item
     model = Word2Vec(modern_meta, min_count=1, size=16)
 
+    model 0, vsize 16, doesnt capture card proximity well... almost no related cards in the "close" ones
+    model 1, vsize 32, captures it a bit better, a few related cards in similar
+    model 2, vsize 128 20 epochs, maybe overtrained
     
 
 SPECIFICATIONS:
