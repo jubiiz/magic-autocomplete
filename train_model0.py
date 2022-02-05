@@ -57,6 +57,14 @@ def main():
     # need txt file maping cards to their vectors
     # list of vectors, in order of card mapping
 
+    # load and separate data into train test split categories (?)
+
+    # model creation
+
+    # compile and fit function
+
+    # model evaluation and testing
+
     singles_path = "f_singles.txt"
     vec_path = "vec_map.txt"
     wv_model_path = "w2v_models/m3.model"
@@ -67,13 +75,51 @@ def main():
 
 
 
+
+
 if __name__ == "__main__":
     main()
 
 """
 # model compile info
 
-model.compile(loss=tf.losses.MeanSquaredError(),
+
+def compile_and_fit(model, window, patience=2):
+  early_stopping = tf.keras.callbacks.EarlyStopping(monitor='val_loss',
+                                                    patience=patience,
+                                                    mode='min')
+
+  model.compile(loss=tf.losses.MeanSquaredError(),
                 optimizer=tf.optimizers.Adam(),
                 metrics=[tf.metrics.MeanAbsoluteError()])
+
+  history = model.fit(window.train, epochs=MAX_EPOCHS,
+                      validation_data=window.val,
+                      callbacks=[early_stopping])
+  return history
+
+#feedback class
+class FeedBack(tf.keras.Model):
+  def __init__(self, units, out_steps):
+    super().__init__()
+    self.out_steps = out_steps
+    self.units = units
+    self.lstm_cell = tf.keras.layers.LSTMCell(units)
+    # Also wrap the LSTMCell in an RNN to simplify the `warmup` method.
+    self.lstm_rnn = tf.keras.layers.RNN(self.lstm_cell, return_state=True)
+    self.dense = tf.keras.layers.Dense(num_features)
+
+  def warmup(self, inputs):
+    # inputs.shape => (batch, time, features)
+    # x.shape => (batch, lstm_units)
+    x, *state = self.lstm_rnn(inputs)
+
+    # predictions.shape => (batch, features)
+    prediction = self.dense(x)
+    return prediction, state
+
+FeedBack.warmup = warmup
+
+feedback_model = FeedBack(units=32, out_steps=OUT_STEPS)
+
 """
