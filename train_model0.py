@@ -1,125 +1,151 @@
+"""
+# IMPORTANT NOTES: LSTM MODEL ARCHITECTURE TAKEN FROM : 
+https://machinelearningmastery.com/how-to-develop-a-word-level-neural-language-model-in-keras/
+
+MODEL IS NOT LEARNING HOW TO PREDICT GOOD CARDS. IT'S LEARNING WHICH CARDS ARE SIMILAR TO MOST OTHER.
+"""
+
 import tensorflow as tf
-from matplotlib import pyplot as plt
+import matplotlib.pyplot as plt
 from gensim.models import Word2Vec
+import pandas as pd
 import numpy as np
 import os
 
-# created with help from https://www.tensorflow.org/tutorials/structured_data/time_series
-class WindowCreator():
-    def __init__(self, input_width, label_width, shift, train_df,
-                val_df, test_df, label_columns=None):
-        self.train_df = train_df
-        self.val_df = val_df
-        self.test_df = test_df
+wvmodel = Word2Vec.load("w2v_models/m3.model")
+wvmodel = wvmodel.wv
 
-         # Work out the label column indices.
-        self.label_columns = label_columns
-        if label_columns is not None:
-            self.label_columns_indices = {name: i for i, name in enumerate(label_columns)}
-            self.column_indices = {name: i for i, name in enumerate(train_df.columns)}
 
-            # Work out the window parameters.
-        self.input_width = input_width
-        self.label_width = label_width
-        self.shift = shift
 
-        self.total_window_size = input_width + shift
 
-        self.input_slice = slice(0, input_width)
-        self.input_indices = np.arange(self.total_window_size)[self.input_slice]
-
-        self.label_start = self.total_window_size - self.label_width
-        self.labels_slice = slice(self.label_start, None)
-        self.label_indices = np.arange(self.total_window_size)[self.labels_slice]
-
-    def __repr__(self):
-        return '\n'.join([
-            f'Total window size: {self.total_window_size}',
-            f'Input indices: {self.input_indices}',
-            f'Label indices: {self.label_indices}',
-            f'Label column name(s): {self.label_columns}'])
-
-def load_vectors(singles_path, vec_path, wv):        
+def load_data(filename):
     """
-    creates a mapping of the card names to their corresponding vector
+    loads a word vector model (filename) into memory
+    returns training data ; testing data
     """
-    mapping ={}
+    lists = []
+    lists_path = os.path.join(os.getcwd(), "f_lists")
+    lists_folder = os.scandir(lists_path)
+    # for each archetype, for each deck, load all cards into a list (list of decks (list of cards (vectors)))
+    for archetype in lists_folder:
+        archetype_folder = os.scandir(archetype.path)
+        # loops over decklists of that archetype
+        for decklist in archetype_folder:
+            cards = []
+            # loads every card of the decklist
+            with open(decklist.path, "r") as r:
+                for line in r:
+                    cardname = line.rstrip("\n")
+                    if len(line) == 0:
+                        continue
+                    #appending vector, not cardname
+                    cards.append(wvmodel[cardname])
+            # only keep length 60 lists
+            if(len(cards) == 60):
+                lists.append(np.array(cards))
+            else:
+                lists.append(np.array(cards[:60]))
 
-    with open(singles_path, "r") as r:
-        for card in r:
-            card = card.rstrip()
-            mapping[card] = wv.wv[card]
+    lists = np.array(lists)
+    num_lists, len_list, len_vec = lists.shape
+    df = pd.DataFrame(data=np.reshape(lists, ((num_lists*len_list), len_vec)), index=None, columns=None)
+    #print("df shape: ", df.shape)
 
-    return(mapping)
+    n = len(lists)
+    train_d = lists
+    test_d = lists
+
+    x_train, y_train = train_d[:, :-1], train_d[:,-1]
+    x_test, y_test = test_d[:, :-1], test_d[:,-1]
+
+    #print(train_d)
+    #print(x_train)
+    #print('ytrain: ', y_train)
+    return(x_train, y_train, x_test, y_test)
+
+def complete_lists(x_test, y_test):
+    """
+    DESCRIPTION TODO
+    """
+
+    """
+    ####testing wv model: making sure retrieval is ok
+    print(x_test[0][0])
+    print(wvmodel.most_similar(x_test[0][0]))
+
+    print('ans: ')
+    print(wvmodel.most_similar(y_test[0]))
+    
+    print("list predicted: ")
+    #x_test[0] is a list
+    for card in x_test[100]:
+        sim = wvmodel.most_similar(card)
+        print(sim[0][0], sim[0][1])
+
+    print(x_test.shape)
+    print(x_test[100].shape)
+
+    pred = lstm_model.predict(x_test)
+    print(pred.shape)
+    print("prediction is: ------------")
+    print(wvmodel.most_similar(pred[100]))
+
+    print("real end-card is:-------------------")
+    print(wvmodel.most_similar(y_test[100]))
+    """
+    lstm_model = tf.keras.models.load_model('lstm_models/m4.h5')
+
+
+    
+    for i in range(len(y_test)):
+        pred = lstm_model.predict(np.array([x_test[i]]))
+        ans = wvmodel.most_similar(y_test[i])[0][0]
+        f_pred = wvmodel.most_similar(pred)[0]
+        print(ans,f_pred, wvmodel.distance(ans, f_pred[0]))
 
 def main():
-    # map cards to their index, into a dictionary
-    # need txt file maping cards to their vectors
-    # list of vectors, in order of card mapping
+    # load data
+    x_train, y_train, x_test, y_test = load_data("w2v_models/m3.model")
+    #print(x_train.shape)
+    #print(y_train.shape)
 
-    # load and separate data into train test split categories (?)
+    """# if build neural network: insert block here
+    # define model
+    model = tf.keras.Sequential()
+    model.add(tf.keras.layers.LSTM(100, return_sequences=True))
+    model.add(tf.keras.layers.LSTM(100))
+    model.add(tf.keras.layers.Dense(100, activation='relu'))
+    model.add(tf.keras.layers.Dense(64))
+    # compile model
+    model.compile(loss='cosine_similarity', optimizer='adam', metrics=['accuracy'])
+    # fit model
+    model.fit(x_train, y_train, batch_size=120, epochs=100)
+    print(model.summary())
+    
+    # save the model to file
+    model.save('lstm_models/m5.h5')"""
 
-    # model creation
 
-    # compile and fit function
-
-    # model evaluation and testing
-
-    singles_path = "f_singles.txt"
-    vec_path = "vec_map.txt"
-    wv_model_path = "w2v_models/m3.model"
-
-    # loads model into memory, vec_map being a mapping of cardname:vector
-    wv = Word2Vec.load(wv_model_path)
-    vec_map = wv.wv
+    complete_lists(x_test, y_test)
 
 
-
+    """
+     # define model
+    model = tf.keras.Sequential()
+    model.add(tf.keras.layers.LSTM(100, return_sequences=True))
+    model.add(tf.keras.layers.LSTM(100))
+    model.add(tf.keras.layers.Dense(100, activation='relu'))
+    model.add(tf.keras.layers.Dense(64))
+    # compile model
+    model.compile(loss='cosine_similarity', optimizer='adam', metrics=['accuracy'])
+    # fit model
+    model.fit(x_train, y_train, batch_size=20, epochs=30)
+    print(model.summary())
+    
+    # save the model to file
+    model.save('lstm_models/m3.h5')
+    """
 
 
 if __name__ == "__main__":
     main()
-
-"""
-# model compile info
-
-
-def compile_and_fit(model, window, patience=2):
-  early_stopping = tf.keras.callbacks.EarlyStopping(monitor='val_loss',
-                                                    patience=patience,
-                                                    mode='min')
-
-  model.compile(loss=tf.losses.MeanSquaredError(),
-                optimizer=tf.optimizers.Adam(),
-                metrics=[tf.metrics.MeanAbsoluteError()])
-
-  history = model.fit(window.train, epochs=MAX_EPOCHS,
-                      validation_data=window.val,
-                      callbacks=[early_stopping])
-  return history
-
-#feedback class
-class FeedBack(tf.keras.Model):
-  def __init__(self, units, out_steps):
-    super().__init__()
-    self.out_steps = out_steps
-    self.units = units
-    self.lstm_cell = tf.keras.layers.LSTMCell(units)
-    # Also wrap the LSTMCell in an RNN to simplify the `warmup` method.
-    self.lstm_rnn = tf.keras.layers.RNN(self.lstm_cell, return_state=True)
-    self.dense = tf.keras.layers.Dense(num_features)
-
-  def warmup(self, inputs):
-    # inputs.shape => (batch, time, features)
-    # x.shape => (batch, lstm_units)
-    x, *state = self.lstm_rnn(inputs)
-
-    # predictions.shape => (batch, features)
-    prediction = self.dense(x)
-    return prediction, state
-
-FeedBack.warmup = warmup
-
-feedback_model = FeedBack(units=32, out_steps=OUT_STEPS)
-
-"""
