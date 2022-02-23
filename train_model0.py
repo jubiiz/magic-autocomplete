@@ -93,15 +93,16 @@ def complete_lists(x_test, y_test):
     print("real end-card is:-------------------")
     print(wvmodel.most_similar(y_test[100]))
     """
-    lstm_model = tf.keras.models.load_model('lstm_models/m4.h5')
+    lstm_model = tf.keras.models.load_model('lstm_models/m5.h5')
 
 
     
-    for i in range(len(y_test)):
-        pred = lstm_model.predict(np.array([x_test[i]]))
-        ans = wvmodel.most_similar(y_test[i])[0][0]
-        f_pred = wvmodel.most_similar(pred)[0]
-        print(ans,f_pred, wvmodel.distance(ans, f_pred[0]))
+    #for i in range(len(y_test)):
+    i=234
+    pred = lstm_model.predict(np.array([x_test[i][:5]]))
+    ans = wvmodel.most_similar(y_test[i])[0][0]
+    f_pred = wvmodel.most_similar(pred)[0]
+    print(ans,f_pred, wvmodel.distance(ans, f_pred[0]))
 
 def main():
     # load data
