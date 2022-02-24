@@ -98,8 +98,16 @@ def complete_lists(x_test, y_test):
 
     
     #for i in range(len(y_test)):
-    i=234
-    pred = lstm_model.predict(np.array([x_test[i][:5]]))
+    i= 645
+    num_known = 0
+    # 59 0 vectors of len 64
+    zeros = [[0.]*64]*(59-num_known)
+    print(zeros)
+    dl = np.array(x_test[i][:num_known])
+    print(dl)
+    dl = np.concatenate([zeros , dl])
+    print(type(dl))
+    pred = lstm_model.predict(np.array([dl]))
     ans = wvmodel.most_similar(y_test[i])[0][0]
     f_pred = wvmodel.most_similar(pred)[0]
     print(ans,f_pred, wvmodel.distance(ans, f_pred[0]))
