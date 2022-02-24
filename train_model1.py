@@ -1,8 +1,6 @@
 """
 # IMPORTANT NOTES: LSTM MODEL ARCHITECTURE TAKEN FROM : 
 https://machinelearningmastery.com/how-to-develop-a-word-level-neural-language-model-in-keras/
-
-MODEL IS NOT LEARNING HOW TO PREDICT GOOD CARDS. IT'S LEARNING WHICH CARDS ARE SIMILAR TO MOST OTHER.
 """
 
 import tensorflow as tf
@@ -11,6 +9,7 @@ from gensim.models import Word2Vec
 import pandas as pd
 import numpy as np
 import os
+import random
 
 wvmodel = Word2Vec.load("w2v_models/m3.model")
 wvmodel = wvmodel.wv
@@ -46,24 +45,41 @@ def load_data(filename):
             else:
                 lists.append(np.array(cards[:60]))
 
-    lists = np.array(lists)
-    num_lists, len_list, len_vec = lists.shape
+    
+    # randomizes lists and cuts them up into different shapes
+    # make lists = many multisize lists
+    # for each list, from 2 to 60, cut it to [:2] -> [:60]
+    data = []
+    zeros = []
+    for i in range(60):
+        zeros.append(np.tile([0.], 64))
 
-    # this df is useless btw, I was trying stuff out
-    df = pd.DataFrame(data=np.reshape(lists, ((num_lists*len_list), len_vec)), index=None, columns=None)
-    #print("df shape: ", df.shape)
+    zeros = np.array(zeros)
 
-    n = len(lists)
-    train_d = lists
-    test_d = lists
 
-    x_train, y_train = train_d[:, :-1], train_d[:,-1]
+
+    for l in lists:
+        for i in range(2, 61):
+            list_mod = np.concatenate([zeros[:60-i], np.array(l[:i])])
+            data.append(np.array(list_mod))
+    random.shuffle(data)
+    
+    n = len(data)
+    data = np.array(data)
+    train_d = data
+    test_d = data
+    print(data[:3, :3])
+    print(data.shape)
+    
+
+    x_train, y_train = train_d[:, :-1], train_d[:, -1]
     x_test, y_test = test_d[:, :-1], test_d[:,-1]
 
     #print(train_d)
     #print(x_train)
     #print('ytrain: ', y_train)
     return(x_train, y_train, x_test, y_test)
+
 
 def complete_lists(x_test, y_test):
     """
@@ -117,10 +133,10 @@ def complete_lists(x_test, y_test):
 def main():
     # load data
     x_train, y_train, x_test, y_test = load_data("w2v_models/m3.model")
-    #print(x_train.shape)
-    #print(y_train.shape)
+    print(x_train.shape)
+    print(y_train.shape)
 
-    """# if build neural network: insert block here
+    # if build neural network: insert block here
     # define model
     model = tf.keras.Sequential()
     model.add(tf.keras.layers.LSTM(100, return_sequences=True))
@@ -130,14 +146,14 @@ def main():
     # compile model
     model.compile(loss='cosine_similarity', optimizer='adam', metrics=['accuracy'])
     # fit model
-    model.fit(x_train, y_train, batch_size=120, epochs=100)
+    model.fit(x_train, y_train, batch_size=800, epochs=100)
     print(model.summary())
     
     # save the model to file
-    model.save('lstm_models/m5.h5')"""
+    model.save('lstm_models/m6.h5')
 
 
-    complete_lists(x_test, y_test)
+    #complete_lists(x_test, y_test)
 
 
     """

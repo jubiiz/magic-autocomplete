@@ -1,0 +1,14 @@
+m5: 
+    model = tf.keras.Sequential()
+    model.add(tf.keras.layers.LSTM(100, return_sequences=True))
+    model.add(tf.keras.layers.LSTM(100))
+    model.add(tf.keras.layers.Dense(100, activation='relu'))
+    model.add(tf.keras.layers.Dense(64))
+    # compile model
+    model.compile(loss='cosine_similarity', optimizer='adam', metrics=['accuracy'])
+    # fit model
+    model.fit(x_train, y_train, batch_size=120, epochs=100)
+    print(model.summary())
+
+    predicts very well last card
+    predicts poorly lists: repeats same card over and over
