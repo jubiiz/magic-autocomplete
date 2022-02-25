@@ -36,6 +36,20 @@ def vectorize(known_cards):
             initial_predictions.append([0.]*64)
     return(initial_predictions)
 
+def card_from_pred(pred, pred_names, known_cards):
+    exceptions = ["forest", "mountain", "island", "swamp", "plains",
+     "snowcovered_forest", "snowcovered_mountain", "snowcovered_island",
+     "snowcovered_swamp", "snowcovered_plains"]
+    possible_cards = W2V.most_similar(pred, topn=16)
+    new_card_name = possible_cards[0][0]
+    i = 0
+    while (pred_names.count(new_card_name)+known_cards.count(new_card_name)) == 4 and new_card_name not in exceptions:
+        # choose another
+        i+=1
+        new_card_name = possible_cards[i][0]
+
+    return(new_card_name)
+
 def main():
     # loads lstm model into memory
     model = tf.keras.models.load_model("lstm_models/m8.h5")
@@ -64,8 +78,7 @@ def main():
 
         # predict next card
         pred = model(input_data)
-        next_card_name = W2V.most_similar(pred.numpy())
-        next_card_name = next_card_name[0][0]
+        next_card_name = card_from_pred(pred.numpy(), pred_names, known_cards)
         next_card_vector = W2V[next_card_name]
 
         # append to prediction lists (names and vectors)

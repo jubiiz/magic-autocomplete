@@ -3,6 +3,7 @@
 https://machinelearningmastery.com/how-to-develop-a-word-level-neural-language-model-in-keras/
 """
 
+from pytz import NonExistentTimeError
 import tensorflow as tf
 import matplotlib.pyplot as plt
 from gensim.models import Word2Vec
@@ -146,11 +147,11 @@ def main():
     # compile model
     model.compile(loss='cosine_similarity', optimizer='adam', metrics=['accuracy'])
     # fit model
-    model.fit(x_train, y_train, batch_size=800, epochs=100)
+    model.fit(x_train, y_train, batch_size=1, epochs=15)
     print(model.summary())
     
     # save the model to file
-    model.save('lstm_models/m6.h5')
+    model.save('lstm_models/m7.h5')
 
 
     #complete_lists(x_test, y_test)

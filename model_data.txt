@@ -12,3 +12,9 @@ m5:
 
     predicts very well last card
     predicts poorly lists: repeats same card over and over
+
+
+m6: 
+    trained on input size 2-59; padded with len=64 0 vectors
+
+m7: batch size none, I think?
