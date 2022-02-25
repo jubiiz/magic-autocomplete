@@ -52,7 +52,7 @@ def card_from_pred(pred, pred_names, known_cards):
 
 def main():
     # loads lstm model into memory
-    model = tf.keras.models.load_model("lstm_models/m8.h5")
+    model = tf.keras.models.load_model("lstm_models/m10.h5")
 
     # filename of the known cards
     filename_known = "info/op3.txt"   ################# USER INPUT HERE

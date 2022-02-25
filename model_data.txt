@@ -18,3 +18,9 @@ m6:
     trained on input size 2-59; padded with len=64 0 vectors
 
 m7: batch size none, I think?
+
+m8: trained on input size 2-59; 300 epochs. top 2 best predictions: decent lists without correction
+
+m9: 2100 epochs. Overfit. if the list is not similar to one in data, it goes weird
+
+m10: 1000 epochs. Maybe slightly overfit? barely. Very good predictions. Almost perfect.
