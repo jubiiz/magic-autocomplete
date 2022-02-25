@@ -6,6 +6,11 @@ import random
 W2V = Word2Vec.load("w2v_models/m3.model")
 W2V = W2V.wv
 
+LSTM_MODEL_PATH = "lstm_models/m11.h5"
+INFO_FILENAME = "info/op1.txt"
+
+ENSURE_LEGAL = True
+
 def load_info_cards(filename_known):
     """
     user inputs a filename of a text file containing a formatted list
@@ -42,6 +47,8 @@ def card_from_pred(pred, pred_names, known_cards):
      "snowcovered_swamp", "snowcovered_plains"]
     possible_cards = W2V.most_similar(pred, topn=16)
     new_card_name = possible_cards[0][0]
+    if ENSURE_LEGAL == False:
+        return()
     i = 0
     while (pred_names.count(new_card_name)+known_cards.count(new_card_name)) == 4 and new_card_name not in exceptions:
         # choose another
@@ -50,15 +57,35 @@ def card_from_pred(pred, pred_names, known_cards):
 
     return(new_card_name)
 
-def main():
-    # loads lstm model into memory
-    model = tf.keras.models.load_model("lstm_models/m8.h5")
+def load_conversion():
+    # returns a conversion table of shape {f_name: uf_name}
+    f_temp = []
+    uf_temp = []
+    with open("f_singles.txt", "r") as r:
+        for line in r:
+            line = line.rstrip("\n")
+            f_temp.append(line)
+        
+    with open("uf_singles.txt", "r") as r:
+        for line in r:
+            line = line.rstrip("\n")
+            uf_temp.append(line)
 
-    # filename of the known cards
-    filename_known = "info/op3.txt"   ################# USER INPUT HERE
-    # loads known card names into memory
-    known_cards = load_info_cards(filename_known)
+    conversion = dict(zip(f_temp, uf_temp))
+    return(conversion)
+
+def pretty_print(known_cards, pred_names, conversion):
+    formated_decklist = known_cards + pred_names
+    unformated_decklist = [conversion[card] for card in formated_decklist]
     
+    # dictionary that keeps track of how many of each card are in the unformated decklist
+    counts_list = {card: unformated_decklist.count(card) for card in set(unformated_decklist)}
+    
+    for card, count in counts_list.items():
+        print(f"{count} {card}")
+
+
+def predict_list(known_cards, model):
     # predicts the rest of the list. They are be stored as vectors, not cardnames
     # they do get transformed back to cardnames to be shown
     predictions = np.array(vectorize(known_cards.copy()))
@@ -85,9 +112,22 @@ def main():
         predictions = np.append(predictions, [next_card_vector], axis=0)
         print(len(predictions))
         pred_names.append(next_card_name)
+    return(pred_names)
 
-          
-    # to print predictions, we can print either the full list, or just the predicted cards
+def main():
+    # loads lstm model into memory
+    model = tf.keras.models.load_model(LSTM_MODEL_PATH)
+    # loads known card names into memory
+    known_cards = load_info_cards(INFO_FILENAME)
+    # predict the list
+    pred_names = predict_list(known_cards, model)
+
+    # unformat lookup
+    conversion = load_conversion()
+
+    pretty_print(known_cards, pred_names, conversion)
+              
+    """# to print predictions, we can print either the full list, or just the predicted cards
     # currently known_cards, -----here starts predictions-----, predictions
     for card in known_cards:
         print(card)
@@ -95,7 +135,7 @@ def main():
     print("-------------here starts predictions---------------")
 
     for card in pred_names:
-        print(card)
+        print(card)"""
 
 if __name__ == "__main__":
     main()

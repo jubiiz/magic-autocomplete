@@ -38,10 +38,10 @@ def vectorize(known_cards):
 
 def main():
     # loads lstm model into memory
-    model = tf.keras.models.load_model("lstm_models/m9.h5")
+    model = tf.keras.models.load_model("lstm_models/m11.h5")
 
     # filename of the known cards
-    filename_known = "info/op1.txt"   ################# USER INPUT HERE
+    filename_known = "info/op3.txt"   ################# USER INPUT HERE
     # loads known card names into memory
     known_cards = load_info_cards(filename_known)
     

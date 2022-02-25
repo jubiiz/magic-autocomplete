@@ -26,12 +26,14 @@ input vectorization:
 
     model 0, vsize 16, doesnt capture card proximity well... almost no related cards in the "close" ones
     model 1, vsize 32, captures it a bit better, a few related cards in similar
-    model 2, vsize 128 20 epochs, maybe overtrained
+    model 2, vsize 128 20 epochs, maybe overtrained (after 2100 epochs: lol nah)
     
 
 SPECIFICATIONS:
 will not deal with sideboarding
 decks sourced from : mtggoldfish
+
+
 
 
 
