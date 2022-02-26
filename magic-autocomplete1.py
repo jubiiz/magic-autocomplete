@@ -6,7 +6,7 @@ import random
 W2V = Word2Vec.load("w2v_models/m3.model")
 W2V = W2V.wv
 
-LSTM_MODEL_PATH = "lstm_models/m11.h5"
+LSTM_MODEL_PATH = "lstm_models/m9.h5"
 INFO_FILENAME = "info/op1.txt"
 
 ENSURE_LEGAL = True
@@ -76,6 +76,7 @@ def load_conversion():
 
 def pretty_print(known_cards, pred_names, conversion):
     formated_decklist = known_cards + pred_names
+    print("len flist, ", len(formated_decklist))
     unformated_decklist = [conversion[card] for card in formated_decklist]
     
     # dictionary that keeps track of how many of each card are in the unformated decklist
@@ -83,6 +84,42 @@ def pretty_print(known_cards, pred_names, conversion):
     
     for card, count in counts_list.items():
         print(f"{count} {card}")
+
+def w6_insta_stat(model):
+    target_list_filename = "f_lists/AmuletTitan/5.txt"
+    target_list = load_info_cards(target_list_filename)
+    pred_names = []
+
+    score = 0
+    remaining = target_list[2:]
+
+    zeros = [[0.]*64]*(60)
+
+    # until the list is complete, predict the next card
+    for i in range(2, 60):
+        print(i)
+        data = np.array(vectorize(target_list[:i]))
+        # prepare input
+        if len(data) < 59:
+            input_data = np.concatenate([zeros[:59-len(data)], data])
+        else: 
+            input_data = data
+        input_data = np.array([input_data])
+
+        # predict next card
+        pred = model(input_data)
+        next_card_name = card_from_pred(pred.numpy(), pred_names, target_list[:2])
+
+        pred_names.append(next_card_name)
+        if next_card_name in remaining:
+            score += 1
+            remaining.remove(next_card_name)
+        print(len(pred_names))
+
+    return(pred_names, (score/58)*100)
+
+
+
 
 
 def predict_list(known_cards, model):
@@ -118,14 +155,17 @@ def main():
     # loads lstm model into memory
     model = tf.keras.models.load_model(LSTM_MODEL_PATH)
     # loads known card names into memory
-    known_cards = load_info_cards(INFO_FILENAME)
+    known_cards = load_info_cards("f_lists/AmuletTitan/5.txt")
     # predict the list
-    pred_names = predict_list(known_cards, model)
+    #pred_names = predict_list(known_cards, model)
+    pred_names, score = w6_insta_stat(model)
 
     # unformat lookup
     conversion = load_conversion()
 
-    pretty_print(known_cards, pred_names, conversion)
+    pretty_print(known_cards[:2], pred_names, conversion)
+
+    print(f"This prediction scored: {score}%")
               
     """# to print predictions, we can print either the full list, or just the predicted cards
     # currently known_cards, -----here starts predictions-----, predictions
