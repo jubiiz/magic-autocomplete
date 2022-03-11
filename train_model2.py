@@ -68,8 +68,19 @@ def load_data(filename):
     print(data[:3, :3])
     print(data.shape)
     
+    conversion = load_conversion()
+    f_singles = list(conversion.keys())
+    num_categories = len(f_singles)
 
     x_train, y_train = train_d[:, :-1], train_d[:, -1]
+    # turn each card into a 
+    y_train_nums = []
+    for card in y_train:
+        name = wvmodel.most_similar(card)[0][0]
+        y_train_nums.append(f_singles.index(name))
+
+    y_train = tf.keras.utils.to_categorical(y_train_nums, num_classes=num_categories)
+
     x_test, y_test = test_d[:, :-1], test_d[:,-1]
 
     #print(train_d)
@@ -127,11 +138,33 @@ def complete_lists(x_test, y_test):
     f_pred = wvmodel.most_similar(pred)[0]
     print(ans,f_pred, wvmodel.distance(ans, f_pred[0]))
 
+def load_conversion():
+    # returns a conversion table of shape {f_name: uf_name}
+    f_temp = []
+    uf_temp = []
+    with open("f_singles.txt", "r") as r:
+        for line in r:
+            line = line.rstrip("\n")
+            f_temp.append(line)
+        
+    with open("uf_singles.txt", "r") as r:
+        for line in r:
+            line = line.rstrip("\n")
+            uf_temp.append(line)
+
+    conversion = dict(zip(f_temp, uf_temp))
+    return(conversion)
+
 def main():
     # load data
     x_train, y_train, x_test, y_test = load_data("w2v_models/m3.model")
     print(x_train.shape)
     print(y_train.shape)
+    # loads conversion table between f and uf cardnames
+    conversion = load_conversion()
+    f_singles = list(conversion.keys())
+    print(len(conversion))
+
 
     # if build neural network: insert block here
     # define model
@@ -139,15 +172,15 @@ def main():
     model.add(tf.keras.layers.LSTM(100, return_sequences=True))
     model.add(tf.keras.layers.LSTM(100))
     model.add(tf.keras.layers.Dense(100, activation='relu'))
-    model.add(tf.keras.layers.Dense(64))
+    model.add(tf.keras.layers.Dense(len(f_singles), activation='softmax'))
     # compile model
-    model.compile(loss='cosine_similarity', optimizer='adam', metrics=['accuracy'])
+    model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
     # fit model
-    model.fit(x_train, y_train, batch_size=800, epochs=10)
+    model.fit(x_train, y_train, batch_size=800, epochs=1)
     print(model.summary())
     
     # save the model to file
-    model.save('lstm_models/m0.h5')
+    #model.save('lstm_models/m1.h5')
 
 
     #complete_lists(x_test, y_test)
