@@ -1,0 +1,59 @@
+m0:
+    # if build neural network: insert block here
+    # define model
+    model = tf.keras.Sequential()
+    model.add(tf.keras.layers.LSTM(100, return_sequences=True))
+    model.add(tf.keras.layers.LSTM(100))
+    model.add(tf.keras.layers.Dense(100, activation='relu'))
+    model.add(tf.keras.layers.Dense(64))
+    # compile model
+    model.compile(loss='cosine_similarity', optimizer='adam', metrics=['accuracy'])
+    # fit model
+    model.fit(x_train, y_train, batch_size=800, epochs=10)
+    print(model.summary())
+    
+    # save the model to file
+    model.save('lstm_models/m0.h5')
+
+
+
+m5: 
+    model = tf.keras.Sequential()
+    model.add(tf.keras.layers.LSTM(100, return_sequences=True))
+    model.add(tf.keras.layers.LSTM(100))
+    model.add(tf.keras.layers.Dense(100, activation='relu'))
+    model.add(tf.keras.layers.Dense(64))
+    # compile model
+    model.compile(loss='cosine_similarity', optimizer='adam', metrics=['accuracy'])
+    # fit model
+    model.fit(x_train, y_train, batch_size=120, epochs=100)
+    print(model.summary())
+
+    predicts very well last card
+    predicts poorly lists: repeats same card over and over
+
+
+m6: 
+    trained on input size 2-59; padded with len=64 0 vectors
+        # if build neural network: insert block here
+    # define model
+    model = tf.keras.Sequential()
+    model.add(tf.keras.layers.LSTM(100, return_sequences=True))
+    model.add(tf.keras.layers.LSTM(100))
+    model.add(tf.keras.layers.Dense(100, activation='relu'))
+    model.add(tf.keras.layers.Dense(64))
+    # compile model
+    model.compile(loss='cosine_similarity', optimizer='adam', metrics=['accuracy'])
+    # fit model
+    model.fit(x_train, y_train, batch_size=800, epochs=100)
+    print(model.summary())
+    # save the model to file
+    model.save('lstm_models/m6.h5')
+
+m7: batch size none, I think?
+
+m8: trained on input size 2-59; 300 epochs. top 2 best predictions: decent lists without correction
+
+m9: 2100 epochs. Overfit. if the list is not similar to one in data, it goes weird
+
+m10: 1000 epochs. Maybe slightly overfit? barely. Very good predictions. Almost perfect.

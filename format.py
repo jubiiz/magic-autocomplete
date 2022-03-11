@@ -34,11 +34,11 @@ def main():
                         continue
                     num = line[0:line.find(" ")]
                     unf_cardname = line[line.find(" ")+1:]
-                    cardname = format_cardname(unf_cardname)
-                    if cardname not in singles:
-                        singles.append(cardname)
+                    #cardname = format_cardname(unf_cardname)
+                    if unf_cardname not in singles:
+                        singles.append(unf_cardname)
                     for i in range(int(num)):
-                        cards.append(cardname)
+                        cards.append(unf_cardname)
     
 
             """
@@ -65,7 +65,7 @@ def main():
                     w.write("\n")
             """
     # once all lists have been looked at, add all singles to a file
-    with open("f_singles.txt", "w") as w:
+    with open("uf_singles.txt", "w") as w:
         for card in singles:
             w.write(card)
             w.write("\n")
