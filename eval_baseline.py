@@ -37,6 +37,9 @@ def card_from_cards(known, correction):
             conversion = load_conversion()
             f_singles = list(conversion.keys())
             pred_card = random.choice(f_singles)
+    else:
+        pred_card = random.choice(known)
+    
     return(pred_card)
 
 def list_from_cards(inputs):
@@ -45,7 +48,7 @@ def list_from_cards(inputs):
 
     while len(prediction) < 60:
         # predict the next card given "prediction" as known cards
-        next_card = card_from_cards(prediction, True)
+        next_card = card_from_cards(prediction, False)
         prediction.append(next_card)
 
     return(prediction[len_inputs:])
@@ -85,7 +88,7 @@ def plot_scores(scores):
 
     ax.set_ylim(0, 1)
 
-    ax.set_title("SY")
+    ax.set_title("SN")
     ax.set_xlabel("Number of Known Cards")
     ax.set_ylabel("Accuracy Ratio")
 
@@ -97,7 +100,7 @@ def main():
     lists_dir = os.scandir(lists_path)
 
     # how well does the algorithm perform when we give it i=1->59 cards
-    scores = {i:0 for i in range(1, 59)}
+    scores = {i:0 for i in range(1, 60)}
     numlists = 0
 
     # update scores for each list
