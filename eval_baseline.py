@@ -48,15 +48,61 @@ def list_from_cards(inputs):
 
     while len(prediction) < 60:
         # predict the next card given "prediction" as known cards
-        next_card = card_from_cards(prediction, False)
+        next_card = card_from_cards(prediction, True)
         prediction.append(next_card)
 
     return(prediction[len_inputs:])
 
-def card_from_vectors(known, correction):
-    pass
+def cardvec_from_vectors(known_names, known_vecs, wv, correction): 
+    """
+    takes as input a list of card vectors ("known")
+    outputs a next card name and next card vector
+    applies correction if "correction" is True
+    """
+    if correction == True:
+        cardname = random.choice(known_names)
+        cardvec = wv[cardname]
+        i = 0 # index of most_similar
+        j = 0 # index of known
+        while known_names.count(cardname) == 4:
+            similar_to = known_vecs[j]
+            cardname = wv.most_similar(similar_to)[i][0]
+            cardvec = wv[cardname]
 
+            j += 1
+            if j == len(known_names):
+                j = 0
+                i += 1
+                if i == 10: # all new vector predictions are predicted; extremely unlikely, but if so it gets 1 wrong
+                    return(cardname, cardvec)
 
+    else:
+        similar_to = random.choice(known_vecs)
+        # we don't want the first most similar:
+        # it'll always be the same card
+        cardname = wv.most_similar(similar_to)[1][0] 
+        cardvec = wv[cardname]
+        
+    return(cardname, cardvec)
+
+def list_from_vectors(input_names):
+    # loads Word2Vec model
+    wv = Word2Vec.load("w2v_models/m3.model")
+    wv = wv.wv
+
+    # yes I know this is useless
+    pred_names = input_names
+    len_input_names = len(input_names)
+
+    # we also want a list of card vectors
+    pred_vecs = [wv[cardname] for cardname in input_names]
+
+    while len(pred_names) < 60:
+        next_cardname, next_cardvec = cardvec_from_vectors(pred_names, pred_vecs, wv, True)
+        pred_vecs.append(next_cardvec)
+        pred_names.append(next_cardname)
+
+    return(pred_names[len_input_names:])
 
 def get_accuracy(prediction, target):
     score = 0
@@ -72,7 +118,7 @@ def update_scores(scores, cards):
     # must find a list given "len_inputs" input cards
     for len_inputs in scores:        
         inputs, target = cards[:len_inputs], cards[len_inputs:]
-        prediction = list_from_cards(inputs)
+        prediction = list_from_vectors(inputs)
         accuracy = get_accuracy(prediction, target)
         scores[len_inputs] += accuracy
 
@@ -88,7 +134,7 @@ def plot_scores(scores):
 
     ax.set_ylim(0, 1)
 
-    ax.set_title("SN")
+    ax.set_title("VY")
     ax.set_xlabel("Number of Known Cards")
     ax.set_ylabel("Accuracy Ratio")
 
