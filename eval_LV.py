@@ -1,11 +1,14 @@
 from gensim.models import Word2Vec
 from matplotlib import pyplot as plt
+import tensorflow as tf
+import numpy as np
 import os
 import random
 
+LV = tf.keras.models.load_model("lstm_models/L50V.h5")
 # loads Word2Vec model
-WV = Word2Vec.load("w2v_models/m3.model")
-WV = WV.wv
+wv = Word2Vec.load("w2v_models/m3.model")
+wv = wv.wv
 
 def load_conversion():
     # returns a conversion table of shape {f_name: uf_name}
@@ -24,83 +27,43 @@ def load_conversion():
     conversion = dict(zip(f_temp, uf_temp))
     return(conversion)
 
-def card_from_cards(known, correction):
-    """
-    given a list of formated cardnames "known"
-    return a prediction of the next card
-    apply correction if "correction" is True
-    """
-    if correction == True:
-        pred_card = random.choice(known)
-        i=0
-        while known.count(pred_card) == 4 and i<len(known):
-            pred_card = known[i]
-            i+=1
-        # if no card in the list is not there in quadruple, pick a random card
-        if known.count(pred_card) == 4:
-            conversion = load_conversion()
-            f_singles = list(conversion.keys())
-            pred_card = random.choice(f_singles)
-    else:
-        pred_card = random.choice(known)
-    
-    return(pred_card)
-
-def list_from_cards(inputs):
-    prediction = inputs
-    len_inputs = len(inputs)
-
-    while len(prediction) < 60:
-        # predict the next card given "prediction" as known cards
-        next_card = card_from_cards(prediction, True)
-        prediction.append(next_card)
-
-    return(prediction[len_inputs:])
-
-def cardvec_from_vectors(known_names, known_vecs, wv, correction): 
+def cardvec_from_LV(known_names, known_vecs, correction): 
     """
     takes as input a list of card vectors ("known")
     outputs a next card name and next card vector
     applies correction if "correction" is True
     """
-    if correction == True:
-        cardname = random.choice(known_names)
-        cardvec = wv[cardname]
-        i = 0 # index of most_similar
-        j = 0 # index of known
-        while known_names.count(cardname) == 4:
-            similar_to = known_vecs[j]
-            cardname = wv.most_similar(similar_to)[i][0]
-            cardvec = wv[cardname]
-
-            j += 1
-            if j == len(known_names):
-                j = 0
-                i += 1
-                if i == 10: # all new vector predictions are predicted; extremely unlikely, but if so it gets 1 wrong
-                    return(cardname, cardvec)
-
+    zeros = [[0.]*64]*(60)
+    # prepare input
+    if len(known_names) < 59:
+        input_data = np.concatenate([zeros[:59-len(known_vecs)], known_vecs])
     else:
-        similar_to = random.choice(known_vecs)
-        # we don't want the first most similar:
-        # it'll always be the same card
-        cardname = wv.most_similar(similar_to)[1][0] 
+        input_data = known_vecs
+    input_data = np.array([input_data])
+
+    pred = LV(input_data)
+    pred = pred.numpy()         
+
+    if correction == True:
+        similars = wv.most_similar(pred)
+        for similar in similars:
+            cardname = similar[0]
+            if known_names.count(cardname) < 4:
+                break
         cardvec = wv[cardname]
-        
+    else:
+        cardname = wv.most_similar(pred)[0][0]
+        cardvec = wv[cardname]    
+    
     return(cardname, cardvec)
 
-def list_from_vectors(input_names):
-
-
-    # yes I know this is useless
-    pred_names = input_names
-    len_input_names = len(input_names)
-
+def list_from_LV(pred_names):
+    len_input_names = len(pred_names)
     # we also want a list of card vectors
-    pred_vecs = [WV[cardname] for cardname in input_names]
+    pred_vecs = [wv[cardname] for cardname in pred_names]
 
     while len(pred_names) < 60:
-        next_cardname, next_cardvec = cardvec_from_vectors(pred_names, pred_vecs, WV, True)
+        next_cardname, next_cardvec = cardvec_from_LV(pred_names, pred_vecs, False)
         pred_vecs.append(next_cardvec)
         pred_names.append(next_cardname)
 
@@ -118,9 +81,10 @@ def get_accuracy(prediction, target):
 def update_scores(scores, cards):
     random.shuffle(cards)
     # must find a list given "len_inputs" input cards
-    for len_inputs in scores:        
+    for len_inputs in scores:
+        random.shuffle(cards)        
         inputs, target = cards[:len_inputs], cards[len_inputs:]
-        prediction = list_from_vectors(inputs)
+        prediction = list_from_LV(inputs)
         accuracy = get_accuracy(prediction, target)
         scores[len_inputs] += accuracy
 
@@ -136,7 +100,7 @@ def plot_scores(scores):
 
     ax.set_ylim(0, 1)
 
-    ax.set_title("VY")
+    ax.set_title("L50VN")
     ax.set_xlabel("Number of Known Cards")
     ax.set_ylabel("Accuracy Ratio")
 
@@ -148,7 +112,9 @@ def main():
     lists_dir = os.scandir(lists_path)
 
     # how well does the algorithm perform when we give it i=1->59 cards
-    scores = {i:0 for i in range(1, 60)}
+    scores = {i:0 for i in range(5, 60, 10)}
+    scores[1] = 0
+    scores[59] = 0
     numlists = 0
 
     # update scores for each list
