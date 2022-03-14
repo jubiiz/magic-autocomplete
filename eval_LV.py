@@ -5,7 +5,7 @@ import numpy as np
 import os
 import random
 
-LV = tf.keras.models.load_model("lstm_models/L10V.h5")
+LV = tf.keras.models.load_model("lstm_models/L1000V_ordered.h5")
 # loads Word2Vec model
 wv = Word2Vec.load("w2v_models/m3.model")
 wv = wv.wv
@@ -100,7 +100,7 @@ def plot_scores(scores):
 
     ax.set_ylim(0, 1)
 
-    ax.set_title("L10VN")
+    ax.set_title("L1000VN")
     ax.set_xlabel("Number of Known Cards")
     ax.set_ylabel("Accuracy Ratio")
 
