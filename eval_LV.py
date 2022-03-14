@@ -5,7 +5,7 @@ import numpy as np
 import os
 import random
 
-LV = tf.keras.models.load_model("lstm_models/L10V.h5")
+LV = tf.keras.models.load_model("lstm_models/L600V.h5")
 # loads Word2Vec model
 wv = Word2Vec.load("w2v_models/m3.model")
 wv = wv.wv
@@ -63,7 +63,7 @@ def list_from_LV(pred_names):
     pred_vecs = [wv[cardname] for cardname in pred_names]
 
     while len(pred_names) < 60:
-        next_cardname, next_cardvec = cardvec_from_LV(pred_names, pred_vecs, False)
+        next_cardname, next_cardvec = cardvec_from_LV(pred_names, pred_vecs, True)
         pred_vecs.append(next_cardvec)
         pred_names.append(next_cardname)
 
@@ -75,7 +75,14 @@ def get_accuracy(prediction, target):
     for card in prediction:
         if card in target:
             score += 1
-            target.remove(card) 
+            target.remove(card)
+    if(False): # verbose predictions
+        print("PREDICTION ---------------")
+        print(prediction)
+        print("TARGET---------------")
+        print(target)
+        print("ACCURACY: ", end=" ") 
+        print(score/len_target)
     return(score/len_target)
 
 def update_scores(scores, cards):
@@ -100,7 +107,7 @@ def plot_scores(scores):
 
     ax.set_ylim(0, 1)
 
-    ax.set_title("L10VN")
+    ax.set_title("L1000VN")
     ax.set_xlabel("Number of Known Cards")
     ax.set_ylabel("Accuracy Ratio")
 
@@ -116,7 +123,7 @@ def main():
     scores[1] = 0
     scores[59] = 0
     numlists = 0
-
+    i=0
     # update scores for each list
     for archetype in lists_dir:
         archetype_dir = os.scandir(archetype.path)
@@ -134,9 +141,12 @@ def main():
                 if(len(cards) != 60):
                     cards = cards[:60]
             # calculate efficiency with this list, update scores
-            scores = update_scores(scores, cards)
-            numlists += 1
-            print(numlists)
+            if i%1 == 0:
+                scores = update_scores(scores, cards)
+                numlists += 1
+                #print(numlists)
+            i+=1
+            print(i)
 
     # normalize scores (average them: up to now accuracies were just added up. Now we divide by the number of attempts)
     print(scores)
