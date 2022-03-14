@@ -63,7 +63,7 @@ def list_from_LV(pred_names):
     pred_vecs = [wv[cardname] for cardname in pred_names]
 
     while len(pred_names) < 60:
-        next_cardname, next_cardvec = cardvec_from_LV(pred_names, pred_vecs, False)
+        next_cardname, next_cardvec = cardvec_from_LV(pred_names, pred_vecs, True)
         pred_vecs.append(next_cardvec)
         pred_names.append(next_cardname)
 
@@ -75,7 +75,14 @@ def get_accuracy(prediction, target):
     for card in prediction:
         if card in target:
             score += 1
-            target.remove(card) 
+            target.remove(card)
+    if(False): # verbose predictions
+        print("PREDICTION ---------------")
+        print(prediction)
+        print("TARGET---------------")
+        print(target)
+        print("ACCURACY: ", end=" ") 
+        print(score/len_target)
     return(score/len_target)
 
 def update_scores(scores, cards):
@@ -116,7 +123,7 @@ def main():
     scores[1] = 0
     scores[59] = 0
     numlists = 0
-
+    i=0
     # update scores for each list
     for archetype in lists_dir:
         archetype_dir = os.scandir(archetype.path)
@@ -134,9 +141,12 @@ def main():
                 if(len(cards) != 60):
                     cards = cards[:60]
             # calculate efficiency with this list, update scores
-            scores = update_scores(scores, cards)
-            numlists += 1
-            print(numlists)
+            if i%1 == 0:
+                scores = update_scores(scores, cards)
+                numlists += 1
+                #print(numlists)
+            i+=1
+            print(i)
 
     # normalize scores (average them: up to now accuracies were just added up. Now we divide by the number of attempts)
     print(scores)
