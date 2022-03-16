@@ -5,7 +5,7 @@ import numpy as np
 import os
 import random
 
-LV = tf.keras.models.load_model("lstm_models/L600V.h5")
+LS = tf.keras.models.load_model("lstm_models/L300S.h5")
 # loads Word2Vec model
 wv = Word2Vec.load("w2v_models/m3.model")
 wv = wv.wv
@@ -29,8 +29,9 @@ def load_conversion():
 
 CONVERSION = load_conversion()
 F_SINGLES = list(CONVERSION.keys())
+PRED_INDEXES = list(range(len(F_SINGLES)))
 
-def cardvec_from_LS(known_names, known_vecs, correction): 
+def card_from_LS(known_names, known_vecs, correction): 
     """
     takes as input a list of card vectors ("known")
     outputs a next card name and next card vector
@@ -44,18 +45,21 @@ def cardvec_from_LS(known_names, known_vecs, correction):
         input_data = known_vecs
     input_data = np.array([input_data])
 
-    pred = LV(input_data)
+    pred = LS(input_data)
     pred = pred.numpy()         
 
     if correction == True:
-        similars = wv.most_similar(pred)
-        for similar in similars:
-            cardname = similar[0]
-            if known_names.count(cardname) < 4:
-                break
+        pred_index = pred.argmax()
+        cardname = F_SINGLES[pred_index]
+        if known_names.count(cardname) >= 4:
+            cardnames = np.random.choice(F_SINGLES, size=20, replace=False, p=pred[0])
+            for cardname in cardnames:
+                if known_names.count(cardname) <4: 
+                    break                            
+            
         cardvec = wv[cardname]
     else:
-        cardname = wv.most_similar(pred)[0][0]
+        cardname = F_SINGLES[pred.argmax()]
         cardvec = wv[cardname]    
     
     return(cardname, cardvec)
@@ -66,7 +70,7 @@ def list_from_LV(pred_names):
     pred_vecs = [wv[cardname] for cardname in pred_names]
 
     while len(pred_names) < 60:
-        next_cardname, next_cardvec = cardvec_from_LV(pred_names, pred_vecs, False)
+        next_cardname, next_cardvec = card_from_LS(pred_names, pred_vecs, True)
         pred_vecs.append(next_cardvec)
         pred_names.append(next_cardname)
 
