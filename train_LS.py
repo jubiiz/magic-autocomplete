@@ -55,7 +55,7 @@ def load_data():
 
     x_train, y_train = data[:, :-1], data[:, -1]
 
-        # turn each card into a 
+    # turn each label into a categorical representation (one hot)
     y_train_nums = []
     for card in y_train:
         name = WV.most_similar(card)[0][0]

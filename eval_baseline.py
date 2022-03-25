@@ -8,7 +8,7 @@ WV = Word2Vec.load("w2v_models/m3.model")
 WV = WV.wv
 
 def load_conversion():
-    # returns a conversion table of shape {f_name: uf_name}
+    # returns a conversion table organized as {f_name: uf_name}
     f_temp = []
     uf_temp = []
     with open("f_singles.txt", "r") as r:
@@ -30,13 +30,14 @@ def card_from_cards(known, correction):
     return a prediction of the next card
     apply correction if "correction" is True
     """
+    # correction parameter prevents >4 of the same card to appear in a list
     if correction == True:
         pred_card = random.choice(known)
         i=0
         while known.count(pred_card) == 4 and i<len(known):
             pred_card = known[i]
             i+=1
-        # if no card in the list is not there in quadruple, pick a random card
+        # if every card is there in quadruple, pick a random card
         if known.count(pred_card) == 4:
             conversion = load_conversion()
             f_singles = list(conversion.keys())
@@ -47,6 +48,10 @@ def card_from_cards(known, correction):
     return(pred_card)
 
 def list_from_cards(inputs):
+    """
+    takes a list of known cards "inputs"
+    returns a predicted list
+    """
     prediction = inputs
     len_inputs = len(inputs)
 
@@ -90,9 +95,13 @@ def cardvec_from_vectors(known_names, known_vecs, wv, correction):
     return(cardname, cardvec)
 
 def list_from_vectors(input_names):
-
-
-    # yes I know this is useless
+    """
+    takes as input a list of cardnames
+    returns a predicted lists
+    predicts from most similar vectors
+    """
+    # yes I know this is useless, pred_name just points to the same list as input_names
+    # I should at least be writing input_names.copy(), but that wouldn't change anything either
     pred_names = input_names
     len_input_names = len(input_names)
 
@@ -107,6 +116,10 @@ def list_from_vectors(input_names):
     return(pred_names[len_input_names:])
 
 def get_accuracy(prediction, target):
+    """
+    computes the accuracy of prediction based on target
+    returns the ratio of unique pairs of cards between the two
+    """
     score = 0
     len_target = len(target)
     for card in prediction:
@@ -116,6 +129,10 @@ def get_accuracy(prediction, target):
     return(score/len_target)
 
 def update_scores(scores, cards):
+    """
+    for a given decklist "cards", makes predictions with 1, 5, 15..., 55, 59 cards
+    updates the prediction accuracy dictionary "scores" after each prediction
+    """
     random.shuffle(cards)
     # must find a list given "len_inputs" input cards
     for len_inputs in scores:        
@@ -129,6 +146,10 @@ def update_scores(scores, cards):
 
 
 def plot_scores(scores):
+    """
+    takes in a dictionary of prediction accuracy per number of input cards
+    plots a bar graphs of the accuracy per number of input cards
+    """
     num_known, score = list(scores.keys()), list(scores.values())
     fig, ax = plt.subplots(1, 1)
 

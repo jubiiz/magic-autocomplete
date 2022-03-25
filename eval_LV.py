@@ -5,7 +5,7 @@ import numpy as np
 import os
 import random
 
-LV = tf.keras.models.load_model("lstm_models/L600V.h5")
+LV = tf.keras.models.load_model("lstm_models/L300V.h5")
 # loads Word2Vec model
 wv = Word2Vec.load("w2v_models/m3.model")
 wv = wv.wv
@@ -70,6 +70,10 @@ def list_from_LV(pred_names):
     return(pred_names[len_input_names:])
 
 def get_accuracy(prediction, target):
+    """
+    computes the accuracy of prediction based on target
+    returns the ratio of unique pairs of cards between the two
+    """
     score = 0
     len_target = len(target)
     for card in prediction:
@@ -86,6 +90,10 @@ def get_accuracy(prediction, target):
     return(score/len_target)
 
 def update_scores(scores, cards):
+    """
+    for a given decklist "cards", makes predictions with 1, 5, 15..., 55, 59 cards
+    updates the prediction accuracy dictionary "scores" after each prediction
+    """
     random.shuffle(cards)
     # must find a list given "len_inputs" input cards
     for len_inputs in scores:
@@ -100,6 +108,10 @@ def update_scores(scores, cards):
 
 
 def plot_scores(scores):
+    """
+    takes in a dictionary of prediction accuracy per number of input cards
+    plots a bar graphs of the accuracy per number of input cards
+    """
     num_known, score = list(scores.keys()), list(scores.values())
     fig, ax = plt.subplots(1, 1)
 
@@ -107,7 +119,7 @@ def plot_scores(scores):
 
     ax.set_ylim(0, 1)
 
-    ax.set_title("L600VN")
+    ax.set_title("L300VN")
     ax.set_xlabel("Number of Known Cards")
     ax.set_ylabel("Accuracy Ratio")
 
