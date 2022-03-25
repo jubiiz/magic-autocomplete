@@ -2,7 +2,11 @@ import os
 import random
 
 def format_cardname(unf_cardname):
-    # formats a cardname to desired format
+    """
+    formats a cardname to desired format
+    takes in an unformatted cardname
+    returns formatted cardname
+    """
     cardname = unf_cardname.replace(" ", "_")
     cardname = cardname.replace("'", "").replace(",", "")
     cardname = cardname.replace("-", "")

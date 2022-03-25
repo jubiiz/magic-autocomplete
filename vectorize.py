@@ -23,6 +23,8 @@ def main():
                     cards.append(cardname)
             lists.append(cards)
     
+    # this is the line that vectorizes all the card "vocabulary"
+    # I had not expected it to be that easy...
     model = Word2Vec(lists, min_count=1, vector_size=64, epochs=10)
     model.save("w2v_models/m3.model")
             

@@ -7,6 +7,11 @@ import time
 LIST_CAP = 40 # maximum number of lists per archetype
 
 def get_links(current):  
+    """
+    takes as input a current url
+    returns all relevent decklist urls found on page current
+    stops after LIST_CAP decklists
+    """
     pages = [] 
     html_texts = []
     num_lists = 0 # number of lists from this archetype gathered
@@ -17,7 +22,10 @@ def get_links(current):
     links = table.findAll('a')
     # until frontier is empty or list cap is reached
     for i in range(LIST_CAP):
-        link = links[i*3]['href'] # only every 3rd link is deck
+        # only every 3rd link is deck
+        # every column row of the decklist table contains:
+        # decklist   |   author   |   event
+        link = links[i*3]['href'] 
         if link.find("/deck") != -1:
             if link.find('http') == -1:
                 link = link.strip('/deck/')
@@ -44,6 +52,8 @@ def main():
         
     lists_folder_path = os.path.join(os.getcwd(), f"unf_lists{os.sep}{name}")
     links_file_path = os.path.join(os.getcwd(), f"links{os.sep}{name}.txt")
+
+    # make a folder at list_folder_path if it does not exist yet
     try:
         os.mkdir(lists_folder_path)
     except Exception as E:
@@ -55,11 +65,10 @@ def main():
             w.write(link)
             w.write("\n")
 
+    # create all list text files
     counter = 0
-    for list_text in html_texts:
-    
+    for list_text in html_texts:    
         file_path = os.path.join(lists_folder_path, str(counter)+".txt")
-
         with open(file_path, 'w') as w:
             for line in list_text.split('\r\n'):
                 if len(line) == 0:

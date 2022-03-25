@@ -53,8 +53,6 @@ def load_data(filename):
 
     zeros = np.array(zeros)
 
-
-
     for l in lists:
         for i in range(2, 61):
             list_mod = np.concatenate([zeros[:60-i], np.array(l[:i])])
