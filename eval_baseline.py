@@ -115,6 +115,25 @@ def list_from_vectors(input_names):
 
     return(pred_names[len_input_names:])
 
+def list_from_random(inputs, f_singles):
+    correction = True
+    len_inputs = len(inputs)
+    if correction:
+        while len(inputs) < 60:
+            next_cardname = random.choice(f_singles)
+            while inputs.count(next_cardname) >= 4:
+                # there are so many cards, the probability it picks the same one twice is 1/578
+                next_cardname = random.choice(f_singles)  
+            inputs.append(next_cardname)
+
+
+    else:
+        while len(inputs) < 60:
+            next_cardname = random.choice(f_singles)
+            inputs.append(next_cardname)
+
+    return(inputs[len_inputs:])
+
 def get_accuracy(prediction, target):
     """
     computes the accuracy of prediction based on target
@@ -137,7 +156,9 @@ def update_scores(scores, cards):
     # must find a list given "len_inputs" input cards
     for len_inputs in scores:        
         inputs, target = cards[:len_inputs], cards[len_inputs:]
-        prediction = list_from_vectors(inputs)
+        conversion = load_conversion()
+        f_singles = list(conversion.keys())
+        prediction = list_from_random(inputs, f_singles)
         accuracy = get_accuracy(prediction, target)
         scores[len_inputs] += accuracy
 
@@ -157,7 +178,7 @@ def plot_scores(scores):
 
     ax.set_ylim(0, 1)
 
-    ax.set_title("VY")
+    ax.set_title("RY")
     ax.set_xlabel("Number of Known Cards")
     ax.set_ylabel("Accuracy Ratio")
 
