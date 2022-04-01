@@ -73,7 +73,7 @@ def list_from_LV(pred_names):
     pred_vecs = [wv[cardname] for cardname in pred_names]
 
     while len(pred_names) < 60:
-        next_cardname, next_cardvec = card_from_LS(pred_names, pred_vecs, False)
+        next_cardname, next_cardvec = card_from_LS(pred_names, pred_vecs, True)
         pred_vecs.append(next_cardvec)
         pred_names.append(next_cardname)
 
@@ -85,18 +85,21 @@ def get_accuracy(prediction, target):
     returns the ratio of unique pairs of cards between the two
     """
     score = 0
+    verbose_target = target.copy()
     len_target = len(target)
     for card in prediction:
         if card in target:
             score += 1
             target.remove(card)
-    if(False): # verbose predictions
+    if(True): # verbose predictions
         print("PREDICTION ---------------")
         print(prediction)
         print("TARGET---------------")
-        print(target)
+        print(verbose_target)
         print("ACCURACY: ", end=" ") 
         print(score/len_target)
+        print("PREDICTION SIZE: ", end=" ")
+        print(len_target)
     return(score/len_target)
 
 def update_scores(scores, cards):

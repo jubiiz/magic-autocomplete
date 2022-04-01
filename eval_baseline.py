@@ -116,7 +116,7 @@ def list_from_vectors(input_names):
     return(pred_names[len_input_names:])
 
 def list_from_random(inputs, f_singles):
-    correction = True
+    correction = False
     len_inputs = len(inputs)
     if correction:
         while len(inputs) < 60:
@@ -178,7 +178,7 @@ def plot_scores(scores):
 
     ax.set_ylim(0, 1)
 
-    ax.set_title("RY")
+    ax.set_title("RN")
     ax.set_xlabel("Number of Known Cards")
     ax.set_ylabel("Accuracy Ratio")
 
