@@ -4,7 +4,7 @@ from gensim.models import Word2Vec
 import numpy as np
 import random
 
-WV = Word2Vec.load("w2v_models/m3.model")
+WV = Word2Vec.load("../w2v_models/m3.model")
 WV = WV.wv
 
 def load_data():
@@ -12,7 +12,7 @@ def load_data():
     returns x_train, y_train (training data)
     """
     lists = []
-    lists_path = os.path.join(os.getcwd(), "f_lists")
+    lists_path = os.path.join(os.getcwd(), "../f_lists")
     lists_folder = os.scandir(lists_path)
     # for each archetype, for each deck, load all cards into a list (list of decks (list of cards (vectors)))
     for archetype in lists_folder:
@@ -38,16 +38,11 @@ def load_data():
     # make lists = many multisize lists
     # for each list, from 2 to 60, cut it to [:2] -> [:60]
     data = []
-    zeros = []
-    for i in range(60):
-        zeros.append(np.tile([0.], 64))
-    zeros = np.array(zeros)
 
     for l in lists:
         for i in range(2, 60):
             list_mod = np.array(l[:i])
             np.random.shuffle(list_mod)
-            list_mod = np.concatenate([zeros[:60-i], list_mod])
             data.append(np.array(list_mod))
     random.shuffle(data)
     data = np.array(data)
@@ -69,12 +64,12 @@ def load_conversion():
     # returns a conversion table of shape {f_name: uf_name}
     f_temp = []
     uf_temp = []
-    with open("f_singles.txt", "r") as r:
+    with open("../f_singles.txt", "r") as r:
         for line in r:
             line = line.rstrip("\n")
             f_temp.append(line)
         
-    with open("uf_singles.txt", "r") as r:
+    with open("../uf_singles.txt", "r") as r:
         for line in r:
             line = line.rstrip("\n")
             uf_temp.append(line)
@@ -84,6 +79,14 @@ def load_conversion():
 
 CONVERSION = load_conversion()
 F_SINGLES = list(CONVERSION.keys())
+
+class PadlessModel(tf.keras.Model):
+    def __init__(self, units):
+        super().__init__()
+        self.units = units
+        # IMPORTANT -------- UNITS MIGHT HAVE TO BE THE SIZE OF THE 
+        self.lstm_cell1 = tf.keras.layers.LSTMCell(units)
+        self.lstm_cell2 = tf.keras.layers.LSTMCell(units)
 
 
 def main():    
@@ -106,7 +109,7 @@ def main():
     print(model.summary())
     
     # save the model to file
-    model.save('lstm_models/L300S.h5')
+    model.save('../lstm_models/L300R.h5')
 
 
 if __name__ == "__main__":
