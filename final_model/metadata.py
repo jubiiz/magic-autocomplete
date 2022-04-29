@@ -3,7 +3,7 @@ Here is stored the final model's metadata, such as data paths
 There are 800 decklists
 There are 578 single cards
 len(F_SINGLES) = 579 because padding_cardname
-# TODO: ADD PERSONNAL ACCESS TOKEN TO GITHUB
+# TODO: ADD PERSONNAL ACCESS TOKEN TO GITHUB, this is a modification
 """
 import os
 
