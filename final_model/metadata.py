@@ -17,3 +17,6 @@ F_LISTS_DIR = os.path.join(DATA_DIR, 'f_lists')
 UNF_LISTS_DIR = os.path.join(DATA_DIR, 'unf_lists')
 
 AUG_INDEXES = list(range(1, 60))
+
+VOCAB_SIZE = 579 # because of the extra 1 card
+# WARNING: HARDCODED FOR THE SPECIFIC DATASET USED FOR THIS PROJECT
