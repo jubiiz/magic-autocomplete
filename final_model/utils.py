@@ -5,8 +5,25 @@ import numpy as np
 import tensorflow as tf
 from sklearn.model_selection import train_test_split
 from keras.preprocessing.sequence import pad_sequences
+from dataclasses import dataclass
 
 from metadata import F_LISTS_DIR, F_SINGLES_PATH, AUG_INDEXES
+
+
+@dataclass
+class XYData:
+    x: np.ndarray
+    y: np.ndarray
+
+
+@dataclass
+class TrainTestValData:
+    train: XYData
+    test: XYData
+    val: XYData
+
+
+
 
 
 def load_f_singles() -> list[str]:
@@ -70,7 +87,7 @@ def train_test_val_split(data: list, train_len=0.7, test_len=0.2, val_len=0.1) -
     return train_data, test_data, val_data
 
 
-def get_aug_inputs_and_labels(decklists) -> tuple[np.ndarray, np.ndarray]:
+def get_aug_inputs_and_labels(decklists) -> XYData:
     """
     Takes as input a list of decklists
     Augments the data and splits it into input/label pairs
@@ -81,10 +98,10 @@ def get_aug_inputs_and_labels(decklists) -> tuple[np.ndarray, np.ndarray]:
     for decklist in decklists:
         for index in AUG_INDEXES:
             inputs.append(decklist[:index])
-            labels.append(decklist[index:])
-    padded_inputs = pad_sequences(inputs, maxlen=59, padding='pre')
-    padded_labels = pad_sequences(labels, maxlen=59, padding='pre')
-    return padded_inputs, padded_labels
+            labels.append(decklist[:])  # 60 cards is what model needs
+    padded_inputs = pad_sequences(inputs, maxlen=59, padding='pre', dtype=np.float32)
+    padded_labels = np.array(labels, dtype=np.float32)
+    return XYData(x=padded_inputs, y=padded_labels)
 
 
 F_SINGLES = load_f_singles()
