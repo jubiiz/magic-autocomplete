@@ -50,6 +50,18 @@ def cardnames_to_nums(cards: list[str]) -> list[int]:
     return [F_SINGLES.index(cardname) for cardname in cards]
 
 
+def decklist_from_path(path: str) -> list:
+    """loads a decklist as a list of formatted cardnames from a specified path"""
+    decklist = []
+    with open(path, "r") as f:
+        for line in f:
+            cardname = line.rstrip("\n")
+            if len(line) == 0:
+                continue
+            decklist.append(cardname)
+    return decklist
+
+
 def load_decklists() -> list[list[int]]:
     """
     loads all formatted decklists as a list of lists of numbers
@@ -59,20 +71,13 @@ def load_decklists() -> list[list[int]]:
     for archetype_obj in f_lists_dir:
         archetype_dir = os.scandir(archetype_obj.path)
         for decklist_obj in archetype_dir:
-            decklist = []
-            with open(decklist_obj.path, "r") as f:
-                for line in f:
-                    cardname = line.rstrip("\n")
-                    if len(line) == 0:
-                        continue
-                    decklist.append(cardname)
-
-                # only keep length 60 lists
-                # (we don't also want to have to predict the size of the list)
-                if len(decklist) == 60:
-                    decklists.append(cardnames_to_nums(decklist))
-                else:
-                    decklists.append(cardnames_to_nums(decklist[:60]))
+            decklist = decklist_from_path(decklist_obj.path)
+            # only keep length 60 lists
+            # (we don't also want to have to predict the size of the list)
+            if len(decklist) == 60:
+                decklists.append(cardnames_to_nums(decklist))
+            else:
+                decklists.append(cardnames_to_nums(decklist[:60]))
     return decklists
 
 
