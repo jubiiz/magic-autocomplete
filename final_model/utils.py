@@ -7,7 +7,7 @@ from sklearn.model_selection import train_test_split
 from keras.preprocessing.sequence import pad_sequences
 from dataclasses import dataclass
 
-from metadata import F_LISTS_DIR, F_SINGLES_PATH, AUG_INDEXES
+from metadata import F_LISTS_DIR, F_SINGLES_PATH, AUG_INDEXES, MODELS_DIR
 
 
 @dataclass
@@ -109,10 +109,20 @@ def get_aug_inputs_and_labels(decklists) -> XYData:
             inputs.append(decklist[:index])
             labels.append(decklist[:])  # 60 cards is what model needs
     padded_inputs = pad_sequences(inputs, maxlen=59, padding='pre', dtype=np.float32)
+    reduced_categorical_labels = process_labels(labels)
+    return XYData(x=padded_inputs, y=reduced_categorical_labels)
+
+
+def process_labels(labels):
     labels = np.array(labels, dtype=np.float32)
     categorical_labels = tf.keras.utils.to_categorical(labels, num_classes=579)
     reduced_categorical_labels = tf.reduce_sum(categorical_labels, 1).numpy()
-    return XYData(x=padded_inputs, y=reduced_categorical_labels)
+    return reduced_categorical_labels
+
+
+def load_model(name: str = 'mymodel') -> tf.keras.models.Model:
+    path_to_model = os.path.join(MODELS_DIR, name)
+    return tf.keras.models.load_model(path_to_model)
 
 
 F_SINGLES = load_f_singles()

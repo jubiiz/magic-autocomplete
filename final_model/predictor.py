@@ -5,12 +5,10 @@ import tensorflow as tf
 from keras.preprocessing.sequence import pad_sequences
 
 from metadata import TEST_INPUTS_DIR, MODELS_DIR
-from utils import decklist_from_path, cardnames_to_nums, nums_to_cardnames, quantities_to_cardnums
+from utils import decklist_from_path, cardnames_to_nums, nums_to_cardnames, quantities_to_cardnums, load_model
 
 
-def load_model(name: str = 'mymodel') -> tf.keras.models.Model:
-    path_to_model = os.path.join(MODELS_DIR, name)
-    return tf.keras.models.load_model(path_to_model)
+
 
 
 def process_num_inputs(num_inputs):
