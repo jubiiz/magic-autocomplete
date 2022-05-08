@@ -1,7 +1,7 @@
 import numpy as np
 import tensorflow as tf
 from utils import TrainTestValData, XYData
-from tensorflow.keras.layers import LSTM, LSTMCell, Dense, Embedding
+from tensorflow.keras.layers import RNN, LSTMCell, Dense, Embedding
 
 from metadata import VOCAB_SIZE
 
@@ -14,8 +14,8 @@ class FullARModel(tf.keras.Model):
         self.units = 128
         self.embedding_dim = 64
         self.embedding = Embedding(input_dim=VOCAB_SIZE, output_dim=self.embedding_dim, mask_zero=True)
-        self.lstm = LSTM(self.units, return_state=True)
         self.lstm_cell = LSTMCell(self.units)
+        self.lstm = RNN(self.lstm_cell, return_state=True)
         self.dense = Dense(self.units, activation='relu')
         self.softmax = Dense(VOCAB_SIZE, activation='softmax')
 
@@ -53,19 +53,23 @@ class FullARModel(tf.keras.Model):
         predictions = tf.stack(predictions)
         predictions = tf.transpose(predictions, [1, 0, 2])
         predictions = tf.cast(predictions, dtype=tf.dtypes.float32)
-        return predictions
+        reduced_predictions = tf.reduce_sum(predictions, 1)
+        return reduced_predictions
 
 
-def compile_and_fit(model, all_data: TrainTestValData, epochs=2, patience=10):
-    early_stopping = tf.keras.callbacks.EarlyStopping(monitor='val_loss',
+def compile_and_fit(model, all_data: TrainTestValData, epochs=60, patience=10):
+    early_stopping = tf.keras.callbacks.EarlyStopping(monitor='loss',
                                                       patience=patience,
-                                                      mode='min')
+                                                      mode='min',
+                                                      min_delta=0.001,
+                                                      restore_best_weights=True,
+                                                      verbose=True)
 
-    model.compile(loss=tf.losses.SparseCategoricalCrossentropy(),
+    model.compile(loss=tf.losses.MeanSquaredError(),
                   optimizer=tf.optimizers.Adam(),
-                  metrics=[])
+                  metrics=['mse'])
 
-    history = model.fit(tf.data.Dataset.from_tensor_slices((all_data.train.x, all_data.train.y)).batch(32), epochs=epochs,
+    history = model.fit(tf.data.Dataset.from_tensor_slices((all_data.train.x, all_data.train.y)).batch(64), epochs=epochs,
                         validation_data=(all_data.val.x, all_data.val.y),
-                        callbacks=[early_stopping])
+                        callbacks=[])
     return history

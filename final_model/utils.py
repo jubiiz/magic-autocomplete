@@ -23,9 +23,6 @@ class TrainTestValData:
     val: XYData
 
 
-
-
-
 def load_f_singles() -> list[str]:
     """loads the card vocabulary: a list of unique cardnames"""
     _f_singles = ['padding_cardname']
@@ -48,6 +45,13 @@ def nums_to_cardnames(nums: list[int]) -> list[str]:
 def cardnames_to_nums(cards: list[str]) -> list[int]:
     """input a list of FORMATTED cardnames, outputs a list of ints"""
     return [F_SINGLES.index(cardname) for cardname in cards]
+
+
+def quantities_to_cardnums(distribution) -> list:
+    cardnums = []
+    for index, quantity in enumerate(distribution):
+        cardnums += [index]*round(quantity)
+    return np.array(cardnums)
 
 
 def decklist_from_path(path: str) -> list:
@@ -105,8 +109,10 @@ def get_aug_inputs_and_labels(decklists) -> XYData:
             inputs.append(decklist[:index])
             labels.append(decklist[:])  # 60 cards is what model needs
     padded_inputs = pad_sequences(inputs, maxlen=59, padding='pre', dtype=np.float32)
-    padded_labels = np.array(labels, dtype=np.float32)
-    return XYData(x=padded_inputs, y=padded_labels)
+    labels = np.array(labels, dtype=np.float32)
+    categorical_labels = tf.keras.utils.to_categorical(labels, num_classes=579)
+    reduced_categorical_labels = tf.reduce_sum(categorical_labels, 1).numpy()
+    return XYData(x=padded_inputs, y=reduced_categorical_labels)
 
 
 F_SINGLES = load_f_singles()

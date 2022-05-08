@@ -22,12 +22,6 @@ def run():
     print("saved")
 
 
-
-
-
-
-
-
 if __name__ == "__main__":
     tf.config.run_functions_eagerly(True)
     run()

@@ -4,8 +4,8 @@ import numpy as np
 import tensorflow as tf
 from keras.preprocessing.sequence import pad_sequences
 
-from utils import decklist_from_path, cardnames_to_nums, nums_to_cardnames
 from metadata import TEST_INPUTS_DIR, MODELS_DIR
+from utils import decklist_from_path, cardnames_to_nums, nums_to_cardnames, quantities_to_cardnums
 
 
 def load_model(name: str = 'mymodel') -> tf.keras.models.Model:
@@ -27,16 +27,16 @@ def predict_list(input_names: list, model, verbose: int = 0) -> list:
     """
     num_inputs = cardnames_to_nums(input_names)
     processed_input = process_num_inputs(num_inputs)
-    output_distribution = model(processed_input, False)
-    output_numbers = list(tf.argmax(output_distribution, axis=2).numpy())[0]
+    output_quantities = model(processed_input, False)[0].numpy()
+    output_cardnums = quantities_to_cardnums(output_quantities)
 
     if verbose:
-        output_names = nums_to_cardnames(output_numbers)
-        print("Input data:\n\n", input_names)
+        output_names = nums_to_cardnames(output_cardnums)
+        print("Input data:\n\n", *input_names, sep='\n')
         print('#'*50, "\n")
-        print("Output Data:\n\n", output_names)
+        print("Output Data:\n\n", *output_names, sep='\n')
 
-    return output_numbers
+    return output_cardnums
 
 
 def main():

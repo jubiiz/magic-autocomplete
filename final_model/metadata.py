@@ -22,6 +22,6 @@ UNF_LISTS_DIR = os.path.join(DATA_DIR, 'unf_lists')
 
 AUG_INDEXES = list(range(1, 60, 3))
 
-MODELS_DIR = os.path.join(CURRENT_DIR, 'models')
+MODELS_DIR = os.path.join(CURRENT_DIR, 'model')
 
 
