@@ -23,5 +23,5 @@ def run():
 
 
 if __name__ == "__main__":
-    tf.config.run_functions_eagerly(True)
+    #tf.config.run_functions_eagerly(True)
     run()
