@@ -57,6 +57,30 @@ class FullARModel(tf.keras.Model):
         return reduced_predictions
 
 
+class MatchingPairsPercent(tf.keras.metrics.Metric):
+    # custom metric training code found here: https://www.tensorflow.org/guide/keras/train_and_evaluate#custom_metrics
+    def __init__(self, name='matching_pairs_percent', **kwargs):
+        super(MatchingPairsPercent, self).__init__(name=name, **kwargs)
+        self.matching_pairs_percent = self.add_weight(name='mpp', initializer='zeros')
+        self.num_predictions = self.add_weight(name='num_preds', initializer='zeros')
+
+    def update_state(self, y_true, y_pred, sample_weight=None):
+        rounded_prediction = tf.math.round(y_pred)
+        matching_pairs = tf.math.minimum(y_true, rounded_prediction)
+        num_matching_pairs = tf.math.reduce_sum(matching_pairs, axis=1)
+        avg_matching_pairs = tf.math.reduce_mean(num_matching_pairs)
+        self.matching_pairs_percent.assign_add(avg_matching_pairs/60)  # 60 cards in a deck
+        self.num_predictions.assign_add(1)
+
+    def result(self):
+        return self.matching_pairs_percent/self.num_predictions
+
+    def reset_state(self):
+        # The state of the metric will be reset at the start of each epoch.
+        self.matching_pairs_percent.assign(0.0)
+        self.num_predictions.assign(0.0)
+
+
 def compile_and_fit(model, all_data: TrainTestValData, epochs=60, patience=10):
     early_stopping = tf.keras.callbacks.EarlyStopping(monitor='loss',
                                                       patience=patience,
@@ -65,11 +89,17 @@ def compile_and_fit(model, all_data: TrainTestValData, epochs=60, patience=10):
                                                       restore_best_weights=True,
                                                       verbose=True)
 
+    mse = tf.keras.losses.MeanSquaredError
+
     model.compile(loss=tf.losses.MeanSquaredError(),
                   optimizer=tf.optimizers.Adam(),
-                  metrics=['mse'])
+                  metrics=[mse(), MatchingPairsPercent()])
 
     history = model.fit(tf.data.Dataset.from_tensor_slices((all_data.train.x, all_data.train.y)).batch(64), epochs=epochs,
-                        validation_data=(all_data.val.x, all_data.val.y),
+                        validation_data=(all_data.test.x, all_data.test.y),
                         callbacks=[])
     return history
+
+
+
+
