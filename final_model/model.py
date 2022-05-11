@@ -9,9 +9,9 @@ from metadata import VOCAB_SIZE
 class FullARModel(tf.keras.Model):
     # good chunks taken from
     # https://www.tensorflow.org/tutorials/structured_data/time_series#advanced_autoregressive_model
-    def __init__(self):
+    def __init__(self, num_units=128):
         super().__init__()
-        self.units = 128
+        self.units = num_units
         self.embedding_dim = 64
         self.embedding = Embedding(input_dim=VOCAB_SIZE, output_dim=self.embedding_dim, mask_zero=True)
         self.lstm_cell = LSTMCell(self.units)
@@ -79,7 +79,7 @@ class MatchingPairsPercent(tf.keras.metrics.Metric):
         self.num_predictions.assign(0.0)
 
 
-def compile_and_fit(model, all_data: TrainTestValData, epochs=300, batch_size=64):
+def compile_and_fit(model, all_data: TrainTestValData, epochs=300, batch_size=64, extra_dense=False, num_units=128):
     early_stopping = tf.keras.callbacks.EarlyStopping(monitor='loss',
                                                       patience=10,
                                                       mode='min',
@@ -93,7 +93,8 @@ def compile_and_fit(model, all_data: TrainTestValData, epochs=300, batch_size=64
                   optimizer=tf.optimizers.Adam(),
                   metrics=[mse(), MatchingPairsPercent()])
 
-    history = model.fit(tf.data.Dataset.from_tensor_slices((all_data.train.x, all_data.train.y)).batch(batch_size), epochs=epochs,
+    history = model.fit(tf.data.Dataset.from_tensor_slices((all_data.train.x, all_data.train.y)).batch(batch_size),
+                        epochs=epochs,
                         validation_data=(all_data.test.x, all_data.test.y),
                         callbacks=[],
                         verbose=2)  # verbose = 2 one line per epoch 0 is silent

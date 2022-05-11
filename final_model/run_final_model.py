@@ -1,4 +1,5 @@
 import os
+import logging
 import argparse
 
 from metadata import F_SINGLES_PATH, UNF_SINGLES_PATH, F_LISTS_DIR, UNF_LISTS_DIR
@@ -10,6 +11,8 @@ from model import FullARModel, compile_and_fit
 
 def run():
     args = get_args()
+    print(args)
+    logging.info(args)
 
     decklists = load_decklists()
     raw_train, raw_test, raw_val = train_test_val_split(decklists)
@@ -19,8 +22,9 @@ def run():
         test=get_aug_inputs_and_labels(raw_test),
         val=get_aug_inputs_and_labels(raw_val))
 
-    model = FullARModel()
-    history = compile_and_fit(model, all_data)
+    model = FullARModel(num_units=args.num_units)
+    history = compile_and_fit(model, all_data, epochs=args.num_epochs,
+                              extra_dense=args.extra_dense, batch_size=args.batch_size)
     model.summary()
 
     tf.keras.models.save_model(model, 'model/mymodel')
