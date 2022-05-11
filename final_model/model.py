@@ -22,10 +22,8 @@ class FullARModel(tf.keras.Model):
     def _warmup(self, inputs):
         # inputs.shape => (batch, time, features)
         # x.shape => (batch, lstm_units)
-        #tf.print("these are the inputs: ", inputs)
         embedded = self.embedding(inputs)
         mask = self.embedding.compute_mask(inputs)
-        #tf.print(mask)
         x, *states = self.lstm(embedded, mask=mask)
         # predictions.shape => (batch, vocab_size)
         prediction = self._deep_layers(x)
@@ -81,9 +79,9 @@ class MatchingPairsPercent(tf.keras.metrics.Metric):
         self.num_predictions.assign(0.0)
 
 
-def compile_and_fit(model, all_data: TrainTestValData, epochs=60, patience=10):
+def compile_and_fit(model, all_data: TrainTestValData, epochs=300, batch_size=64):
     early_stopping = tf.keras.callbacks.EarlyStopping(monitor='loss',
-                                                      patience=patience,
+                                                      patience=10,
                                                       mode='min',
                                                       min_delta=0.001,
                                                       restore_best_weights=True,
@@ -95,9 +93,10 @@ def compile_and_fit(model, all_data: TrainTestValData, epochs=60, patience=10):
                   optimizer=tf.optimizers.Adam(),
                   metrics=[mse(), MatchingPairsPercent()])
 
-    history = model.fit(tf.data.Dataset.from_tensor_slices((all_data.train.x, all_data.train.y)).batch(64), epochs=epochs,
+    history = model.fit(tf.data.Dataset.from_tensor_slices((all_data.train.x, all_data.train.y)).batch(batch_size), epochs=epochs,
                         validation_data=(all_data.test.x, all_data.test.y),
-                        callbacks=[])
+                        callbacks=[],
+                        verbose=2)  # verbose = 2 one line per epoch 0 is silent
     return history
 
 
