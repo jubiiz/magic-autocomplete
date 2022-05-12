@@ -9,7 +9,7 @@ from metadata import VOCAB_SIZE
 class FullARModel(tf.keras.Model):
     # good chunks taken from
     # https://www.tensorflow.org/tutorials/structured_data/time_series#advanced_autoregressive_model
-    def __init__(self, num_units=128):
+    def __init__(self, num_units=128, extra_dense=False):
         super().__init__()
         self.units = num_units
         self.embedding_dim = 64
@@ -17,6 +17,9 @@ class FullARModel(tf.keras.Model):
         self.lstm_cell = LSTMCell(self.units)
         self.lstm = RNN(self.lstm_cell, return_state=True)
         self.dense = Dense(self.units, activation='relu')
+        self.extra_dense = extra_dense
+        if self.extra_dense:
+            self.extra_dense_layer = Dense(self.units, activation='relu', name='extra_dense_layer')
         self.softmax = Dense(VOCAB_SIZE, activation='softmax')
 
     def _warmup(self, inputs):
@@ -31,6 +34,8 @@ class FullARModel(tf.keras.Model):
 
     def _deep_layers(self, x):
         deep = self.dense(x)
+        if self.extra_dense:
+            deep = self.extra_dense_layer(deep)
         softmax_output = self.softmax(deep)
         return softmax_output
 
@@ -67,11 +72,11 @@ class MatchingPairsPercent(tf.keras.metrics.Metric):
         matching_pairs = tf.math.minimum(y_true, rounded_prediction)
         num_matching_pairs = tf.math.reduce_sum(matching_pairs, axis=1)
         avg_matching_pairs = tf.math.reduce_mean(num_matching_pairs)
-        self.matching_pairs_percent.assign_add(avg_matching_pairs/60)  # 60 cards in a deck
+        self.matching_pairs_percent.assign_add(avg_matching_pairs / 60)  # 60 cards in a deck
         self.num_predictions.assign_add(1)
 
     def result(self):
-        return self.matching_pairs_percent/self.num_predictions
+        return self.matching_pairs_percent / self.num_predictions
 
     def reset_state(self):
         # The state of the metric will be reset at the start of each epoch.
@@ -79,13 +84,15 @@ class MatchingPairsPercent(tf.keras.metrics.Metric):
         self.num_predictions.assign(0.0)
 
 
-def compile_and_fit(model, all_data: TrainTestValData, epochs=300, batch_size=64, extra_dense=False, num_units=128):
-    early_stopping = tf.keras.callbacks.EarlyStopping(monitor='loss',
-                                                      patience=10,
-                                                      mode='min',
-                                                      min_delta=0.001,
-                                                      restore_best_weights=True,
-                                                      verbose=True)
+def compile_and_fit(model, all_data: TrainTestValData, epochs=10, batch_size=64,
+                    checkpoint_filepath='checkpoints'):
+    checkpoint_callback = tf.keras.callbacks.ModelCheckpoint(filepath=checkpoint_filepath,
+                                                             monitor='val_matching_pairs_percent',
+                                                             verbose=1,
+                                                             save_best_only=True,
+                                                             save_weights_only=False,
+                                                             mode='max',
+                                                             save_freq='epoch')
 
     mse = tf.keras.losses.MeanSquaredError
 
@@ -96,10 +103,6 @@ def compile_and_fit(model, all_data: TrainTestValData, epochs=300, batch_size=64
     history = model.fit(tf.data.Dataset.from_tensor_slices((all_data.train.x, all_data.train.y)).batch(batch_size),
                         epochs=epochs,
                         validation_data=(all_data.test.x, all_data.test.y),
-                        callbacks=[],
+                        callbacks=[checkpoint_callback],
                         verbose=2)  # verbose = 2 one line per epoch 0 is silent
     return history
-
-
-
-

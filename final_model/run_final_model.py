@@ -14,6 +14,7 @@ def run():
     print(args)
     logging.info(args)
 
+
     decklists = load_decklists()
     raw_train, raw_test, raw_val = train_test_val_split(decklists)
 
@@ -22,13 +23,14 @@ def run():
         test=get_aug_inputs_and_labels(raw_test),
         val=get_aug_inputs_and_labels(raw_val))
 
-    model = FullARModel(num_units=args.num_units)
+    model = FullARModel(num_units=args.num_units, extra_dense=args.extra_dense)
     history = compile_and_fit(model, all_data, epochs=args.num_epochs,
-                              extra_dense=args.extra_dense, batch_size=args.batch_size)
+                              batch_size=args.batch_size)
     model.summary()
 
-    tf.keras.models.save_model(model, 'model/mymodel')
+    tf.keras.models.save_model(model, 'model/mymodel')  # add gcp export path
     print("saved")
+    logging.info('saved')
 
 
 def get_args():
@@ -48,11 +50,6 @@ def get_args():
         '--num-units',
         default=128,
         type=int,
-    )
-    args_parser.add_argument(
-        '--hp-tune',
-        default=False,
-        type=bool,
     )
     args_parser.add_argument(
         '--extra-dense',
