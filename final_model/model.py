@@ -96,9 +96,9 @@ def compile_and_fit(model, all_data: TrainTestValData, epochs=10, batch_size=64,
 
     mse = tf.keras.losses.MeanSquaredError
 
-    model.compile(loss=tf.losses.MeanSquaredError(),
+    model.compile(loss='mse',
                   optimizer=tf.optimizers.Adam(),
-                  metrics=[mse(), MatchingPairsPercent()])
+                  metrics=['mse', MatchingPairsPercent()])
 
     history = model.fit(tf.data.Dataset.from_tensor_slices((all_data.train.x, all_data.train.y)).batch(batch_size),
                         epochs=epochs,

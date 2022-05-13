@@ -23,7 +23,7 @@ class TrainTestValData:
     val: XYData
 
 
-def load_f_singles() -> list[str]:
+def load_f_singles() -> list:
     """loads the card vocabulary: a list of unique cardnames"""
     _f_singles = ['padding_cardname']
     with open(F_SINGLES_PATH) as f:
@@ -37,12 +37,12 @@ def load_unf_singles():
     pass
 
 
-def nums_to_cardnames(nums: list[int]) -> list[str]:
+def nums_to_cardnames(nums: list) -> list:
     """input a list of card INDEXES, outputs a list of FORMATTED cardnames"""
     return [F_SINGLES[index] for index in nums]
 
 
-def cardnames_to_nums(cards: list[str]) -> list[int]:
+def cardnames_to_nums(cards: list) -> list:
     """input a list of FORMATTED cardnames, outputs a list of ints"""
     return [F_SINGLES.index(cardname) for cardname in cards]
 
@@ -66,7 +66,7 @@ def decklist_from_path(path: str) -> list:
     return decklist
 
 
-def load_decklists() -> list[list[int]]:
+def load_decklists() -> list:
     """
     loads all formatted decklists as a list of lists of numbers
     """

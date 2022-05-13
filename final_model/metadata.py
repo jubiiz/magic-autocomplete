@@ -10,7 +10,7 @@ import os
 VOCAB_SIZE = 579 # because of the extra 1 card
 # WARNING: HARDCODED FOR THE SPECIFIC DATASET USED FOR THIS PROJECT
 
-ROOT_DIR = '/home/julien/coding/PIMA/magic-autocomplete/'
+ROOT_DIR = 'U:\documents\loisirs\programmation\PI-MA\magic-autocomplete'
 CURRENT_DIR = os.path.join(ROOT_DIR, 'final_model')
 
 DATA_DIR = os.path.join(ROOT_DIR, 'data')

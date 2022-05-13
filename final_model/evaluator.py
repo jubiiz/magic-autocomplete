@@ -1,10 +1,11 @@
+import os
 import numpy as np
 import tensorflow as tf
 from matplotlib import pyplot as plt
 from keras.preprocessing.sequence import pad_sequences
 
-from metadata import AUG_INDEXES
-from utils import load_decklists, process_labels, load_model
+from metadata import AUG_INDEXES, MODELS_DIR
+from utils import load_decklists, process_labels
 
 
 def plot_scores(scores):
@@ -30,17 +31,49 @@ def percent_matching_pairs(prediction, label):
     return matching_ratio.numpy()
 
 
+class MatchingPairsPercent(tf.keras.metrics.Metric):
+    # custom metric training code found here: https://www.tensorflow.org/guide/keras/train_and_evaluate#custom_metrics
+    def __init__(self, name='matching_pairs_percent', **kwargs):
+        super(MatchingPairsPercent, self).__init__(name=name, **kwargs)
+        self.matching_pairs_percent = self.add_weight(name='mpp', initializer='zeros')
+        self.num_predictions = self.add_weight(name='num_preds', initializer='zeros')
+
+    def update_state(self, y_true, y_pred, sample_weight=None):
+        rounded_prediction = tf.math.round(y_pred)
+        matching_pairs = tf.math.minimum(y_true, rounded_prediction)
+        num_matching_pairs = tf.math.reduce_sum(matching_pairs, axis=1)
+        avg_matching_pairs = tf.math.reduce_mean(num_matching_pairs)
+        self.matching_pairs_percent.assign_add(avg_matching_pairs / 60)  # 60 cards in a deck
+        self.num_predictions.assign_add(1)
+
+    def result(self):
+        return self.matching_pairs_percent / self.num_predictions
+
+    def reset_state(self):
+        # The state of the metric will be reset at the start of each epoch.
+        self.matching_pairs_percent.assign(0.0)
+        self.num_predictions.assign(0.0)
+
+
+def load_model(name: str = 'mymodel') -> tf.keras.models.Model:
+    path_to_model = os.path.join(MODELS_DIR, name)
+    return tf.keras.models.load_model(path_to_model)
+
+
 def main():
     decklists = load_decklists()
     processed_labels = process_labels(decklists)
     test_set = zip(decklists, processed_labels)
 
-    model = load_model(name='mymodel')
+    print('loading model')
+
+    model = tf.keras.models.load_model('checkpoints', custom_objects={'MatchingPairsPercent': MatchingPairsPercent})
     indexes = list(range(1, 60))
     scores = {index: 0 for index in indexes}
     num_decklists = 0
 
     for input_decklist, label_decklist in test_set:
+        print(num_decklists)
         num_decklists += 1
         for index in indexes:
             sliced_input = input_decklist[:index]
