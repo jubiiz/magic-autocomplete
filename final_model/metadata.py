@@ -24,4 +24,5 @@ AUG_INDEXES = list(range(1, 60, 3))
 
 MODELS_DIR = os.path.join(CURRENT_DIR, 'model')
 
-
+BUCKET_NAME = "magic-autocomplete"
+PROJECT_NAME = "storied-box-346921"

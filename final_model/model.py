@@ -85,7 +85,7 @@ class MatchingPairsPercent(tf.keras.metrics.Metric):
 
 
 def compile_and_fit(model, all_data: TrainTestValData, epochs=10, batch_size=64,
-                    checkpoint_filepath='checkpoints'):
+                    checkpoint_filepath='checkpoints', hptune=False):
     checkpoint_callback = tf.keras.callbacks.ModelCheckpoint(filepath=checkpoint_filepath,
                                                              monitor='val_matching_pairs_percent',
                                                              verbose=1,
@@ -93,6 +93,8 @@ def compile_and_fit(model, all_data: TrainTestValData, epochs=10, batch_size=64,
                                                              save_weights_only=False,
                                                              mode='max',
                                                              save_freq='epoch')
+
+
 
     mse = tf.keras.losses.MeanSquaredError
 

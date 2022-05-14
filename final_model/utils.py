@@ -1,13 +1,14 @@
 import os
 import random
 
+from google.cloud import storage
 import numpy as np
 import tensorflow as tf
 from sklearn.model_selection import train_test_split
 from keras.preprocessing.sequence import pad_sequences
 from dataclasses import dataclass
 
-from metadata import F_LISTS_DIR, F_SINGLES_PATH, AUG_INDEXES, MODELS_DIR
+from metadata import F_LISTS_DIR, F_SINGLES_PATH, AUG_INDEXES, MODELS_DIR, BUCKET_NAME
 
 
 @dataclass
@@ -47,7 +48,7 @@ def cardnames_to_nums(cards: list) -> list:
     return [F_SINGLES.index(cardname) for cardname in cards]
 
 
-def quantities_to_cardnums(distribution) -> list:
+def quantities_to_cardnums(distribution) -> np.ndarray:
     cardnums = []
     for index, quantity in enumerate(distribution):
         cardnums += [index]*round(quantity)
@@ -83,6 +84,26 @@ def load_decklists() -> list:
             else:
                 decklists.append(cardnames_to_nums(decklist[:60]))
     return decklists
+
+
+def load_f_decks_from_bucket(bucket_name: str, data_folder: str):
+    storage_client = storage.Client()
+    bucket = storage_client.bucket(bucket_name)
+    decklists = []
+    for blob in bucket.list_blobs(prefix=data_folder):
+        list_as_text = blob.download_as_text()
+        decklist = list_as_text.strip("\n").split("\n")
+        decklists.append(cardnames_to_nums(decklist[:60]))
+    return decklists
+
+
+def load_f_singles_from_bucket(bucket_name: str, path_to_f_singles: str):
+    storage_client = storage.Client()
+    bucket = storage_client.bucket(bucket_name)
+    _f_singles = ['padding_cardname']
+    singles_text = bucket.blob(path_to_f_singles).download_as_text()
+    _f_singles += singles_text.strip("\n").split("\n")
+    return _f_singles
 
 
 def train_test_val_split(data: list, train_len=0.7, test_len=0.2, val_len=0.1) -> tuple:
@@ -125,11 +146,12 @@ def load_model(name: str = 'mymodel') -> tf.keras.models.Model:
     return tf.keras.models.load_model(path_to_model)
 
 
-F_SINGLES = load_f_singles()
+F_SINGLES = load_f_singles_from_bucket(BUCKET_NAME, 'data/f_singles.txt')
 # UNF_SINGLES = load_unf_singles()
 
 if __name__ == "__main__":
-    mydata = load_decklists()
+    mydata = load_f_decks_from_bucket(BUCKET_NAME, 'data/f_lists')
+    print(mydata)
     train, test, val = train_test_val_split(mydata)
     aug_train = get_aug_inputs_and_labels(train)
     print(aug_train)
