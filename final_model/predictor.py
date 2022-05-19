@@ -4,8 +4,8 @@ import numpy as np
 import tensorflow as tf
 from keras.preprocessing.sequence import pad_sequences
 
-from metadata import TEST_INPUTS_DIR, MODELS_DIR
-from utils import decklist_from_path, cardnames_to_nums, nums_to_cardnames, quantities_to_cardnums, load_model
+from gcloud_export.trainer.metadata import TEST_INPUTS_DIR, MODELS_DIR
+from gcloud_export.trainer.utils import decklist_from_path, cardnames_to_nums, nums_to_cardnames, quantities_to_cardnums, load_model
 
 
 
@@ -40,7 +40,7 @@ def predict_list(input_names: list, model, verbose: int = 0) -> list:
 def main():
     test_file_path = os.path.join(TEST_INPUTS_DIR, 'test0.txt')
     input_names = decklist_from_path(test_file_path)
-    model = load_model(name='mymodel')
+    model = load_model('best_19')
     predict_list(input_names, model, verbose=1)
     print("Done.")
 

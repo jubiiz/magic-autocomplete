@@ -4,8 +4,8 @@ import tensorflow as tf
 from matplotlib import pyplot as plt
 from keras.preprocessing.sequence import pad_sequences
 
-from metadata import AUG_INDEXES, MODELS_DIR
-from utils import load_decklists, process_labels
+from gcloud_export.trainer.metadata import AUG_INDEXES, MODELS_DIR
+from gcloud_export.trainer.utils import load_decklists, process_labels, train_test_val_split
 
 
 def plot_scores(scores):
@@ -18,9 +18,9 @@ def plot_scores(scores):
 
     ax.bar(num_known, score)
     ax.set_ylim(0, 1)
-    ax.set_title("Final test model #1 (60 epochs)")
+    ax.set_title("Final test model #19 (300 epochs)")
     ax.set_xlabel("Number of Known Cards")
-    ax.set_ylabel("Accuracy Ratio")
+    ax.set_ylabel("Matching Pairs Percent")
     plt.show()
 
 
@@ -55,19 +55,22 @@ class MatchingPairsPercent(tf.keras.metrics.Metric):
         self.num_predictions.assign(0.0)
 
 
-def load_model(name: str = 'mymodel') -> tf.keras.models.Model:
+def load_model(name: str = 'best_3') -> tf.keras.models.Model:
     path_to_model = os.path.join(MODELS_DIR, name)
-    return tf.keras.models.load_model(path_to_model)
+    print(path_to_model)
+    return tf.keras.models.load_model(path_to_model, custom_objects={'MatchingPairsPercent': MatchingPairsPercent})
 
 
 def main():
     decklists = load_decklists()
+    _, __, val_data = train_test_val_split(decklists)
     processed_labels = process_labels(decklists)
     test_set = zip(decklists, processed_labels)
 
     print('loading model')
 
-    model = tf.keras.models.load_model('checkpoints', custom_objects={'MatchingPairsPercent': MatchingPairsPercent})
+    model = load_model('best_19')
+    model.summary()
     indexes = list(range(1, 60))
     scores = {index: 0 for index in indexes}
     num_decklists = 0
