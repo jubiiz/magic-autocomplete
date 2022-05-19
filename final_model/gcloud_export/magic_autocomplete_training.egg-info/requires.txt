@@ -1,0 +1,5 @@
+numpy==1.21
+tensorflow==2.8.0
+google-cloud
+google-cloud-storage
+cloudml-hypertune
