@@ -5,8 +5,8 @@ import tensorflow as tf
 from keras.preprocessing.sequence import pad_sequences
 
 from gcloud_export.trainer.metadata import TEST_INPUTS_DIR, MODELS_DIR
-from gcloud_export.trainer.utils import decklist_from_path, cardnames_to_nums, nums_to_cardnames, quantities_to_cardnums, load_model
-
+from gcloud_export.trainer.utils import decklist_from_path, cardnames_to_nums, nums_to_cardnames, quantities_to_cardnums
+from gcloud_export.trainer.model import MatchingPairsPercent
 
 
 
@@ -35,6 +35,12 @@ def predict_list(input_names: list, model, verbose: int = 0) -> list:
         print("Output Data:\n\n", *output_names, sep='\n')
 
     return output_cardnums
+
+
+def load_model(name: str = 'best_3') -> tf.keras.models.Model:
+    path_to_model = os.path.join(MODELS_DIR, name)
+    print(path_to_model)
+    return tf.keras.models.load_model(path_to_model, custom_objects={'MatchingPairsPercent': MatchingPairsPercent})
 
 
 def main():
