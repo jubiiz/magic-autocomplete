@@ -1,14 +1,15 @@
 import os
 import random
+import logging
 
-from google.cloud import storage
 import numpy as np
 import tensorflow as tf
+from google.cloud import storage
+from dataclasses import dataclass
 from sklearn.model_selection import train_test_split
 from keras.preprocessing.sequence import pad_sequences
-from dataclasses import dataclass
 
-from metadata import F_LISTS_DIR, F_SINGLES_PATH, AUG_INDEXES, MODELS_DIR, BUCKET_NAME
+from .metadata import F_LISTS_DIR, F_SINGLES_PATH, AUG_INDEXES, MODELS_DIR, BUCKET_NAME
 
 
 @dataclass
@@ -67,10 +68,11 @@ def decklist_from_path(path: str) -> list:
     return decklist
 
 
-def load_decklists() -> list:
+def load_f_decks_from_local() -> list:
     """
     loads all formatted decklists as a list of lists of numbers
     """
+    logging.info("loading decklists from local source")
     decklists = []
     f_lists_dir = os.scandir(F_LISTS_DIR)
     for archetype_obj in f_lists_dir:
@@ -83,10 +85,12 @@ def load_decklists() -> list:
                 decklists.append(cardnames_to_nums(decklist))
             else:
                 decklists.append(cardnames_to_nums(decklist[:60]))
+    logging.info("decklists loaded, preprocessing data")
     return decklists
 
 
-def load_f_decks_from_bucket(bucket_name: str, data_folder: str):
+def load_decks_from_bucket(bucket_name: str, data_folder: str):
+    logging.info("loading decklists from cloud")
     storage_client = storage.Client()
     bucket = storage_client.bucket(bucket_name)
     decklists = []
@@ -94,10 +98,12 @@ def load_f_decks_from_bucket(bucket_name: str, data_folder: str):
         list_as_text = blob.download_as_text()
         decklist = list_as_text.strip("\n").split("\n")
         decklists.append(cardnames_to_nums(decklist[:60]))
+    logging.info("decklists loaded")
     return decklists
 
 
 def load_f_singles_from_bucket(bucket_name: str, path_to_f_singles: str):
+    logging.info("loading formatted singles from cloud")
     storage_client = storage.Client()
     bucket = storage_client.bucket(bucket_name)
     _f_singles = ['padding_cardname']
@@ -150,7 +156,7 @@ F_SINGLES = load_f_singles()
 # UNF_SINGLES = load_unf_singles()
 
 if __name__ == "__main__":
-    mydata = load_decklists(BUCKET_NAME, 'data/f_lists')
+    mydata = load_f_decks_from_local(BUCKET_NAME, 'data/f_lists')
     print(mydata)
     train, test, val = train_test_val_split(mydata)
     aug_train = get_aug_inputs_and_labels(train)

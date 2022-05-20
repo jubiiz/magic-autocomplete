@@ -1,9 +1,9 @@
 import numpy as np
 import tensorflow as tf
-from utils import TrainTestValData, XYData
 from tensorflow.keras.layers import RNN, LSTMCell, Dense, Embedding
 
-from metadata import VOCAB_SIZE
+from .metadata import VOCAB_SIZE
+from .utils import TrainTestValData, XYData
 
 
 class FullARModel(tf.keras.Model):
@@ -63,7 +63,6 @@ class FullARModel(tf.keras.Model):
 
 
 class MatchingPairsPercent(tf.keras.metrics.Metric):
-    # custom metric training code found here: https://www.tensorflow.org/guide/keras/train_and_evaluate#custom_metrics
     def __init__(self, name='matching_pairs_percent', **kwargs):
         super(MatchingPairsPercent, self).__init__(name=name, **kwargs)
         self.matching_pairs_percent = self.add_weight(name='mpp', initializer='zeros')

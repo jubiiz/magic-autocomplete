@@ -4,8 +4,8 @@ import tensorflow as tf
 from matplotlib import pyplot as plt
 from keras.preprocessing.sequence import pad_sequences
 
-from gcloud_export.trainer.metadata import AUG_INDEXES, MODELS_DIR
-from gcloud_export.trainer.utils import load_decklists, process_labels, train_test_val_split
+from main_package.trainer.metadata import AUG_INDEXES, MODELS_DIR
+from main_package.trainer.utils import load_decklists, process_labels, train_test_val_split
 
 
 def plot_scores(scores):

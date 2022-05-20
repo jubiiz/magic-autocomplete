@@ -4,11 +4,9 @@ import numpy as np
 import tensorflow as tf
 from keras.preprocessing.sequence import pad_sequences
 
-from gcloud_export.trainer.metadata import TEST_INPUTS_DIR, MODELS_DIR
-from gcloud_export.trainer.utils import decklist_from_path, cardnames_to_nums, nums_to_cardnames, quantities_to_cardnums
-from gcloud_export.trainer.model import MatchingPairsPercent
-
-
+from main_package.scripts.metadata import TEST_INPUTS_DIR, MODELS_DIR
+from main_package.scripts.utils import decklist_from_path, cardnames_to_nums, nums_to_cardnames, quantities_to_cardnums
+from main_package.scripts.model import MatchingPairsPercent
 
 
 def process_num_inputs(num_inputs):
