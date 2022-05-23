@@ -8,7 +8,7 @@ def main():
     output_dir = os.path.join(os.getcwd(), 'model', model_name)
 
     # windows
-    subprocess.run(['python', '-m', 'main_package.scripts.task', f'--model-name={model_name}',
+    subprocess.run(['python', '-m', 'main_package.scripts.task', f'--model-name={model_name}', '--num-epochs=60',
                     f'--output-dir={output_dir}', '--gcloud-training', ''])
 
 
