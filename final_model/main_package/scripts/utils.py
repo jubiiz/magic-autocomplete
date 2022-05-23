@@ -34,22 +34,18 @@ def load_f_singles() -> list:
     return _f_singles
 
 
-def load_unf_singles():
-    # TODO
-    pass
-
-
-def nums_to_cardnames(nums: list) -> list:
+def nums_to_cardnames(nums: np.ndarray) -> list:
     """input a list of card INDEXES, outputs a list of FORMATTED cardnames"""
     return [F_SINGLES[index] for index in nums]
 
 
-def cardnames_to_nums(cards: list) -> list:
+def card_names_to_nums(cards: list) -> list:
     """input a list of FORMATTED cardnames, outputs a list of ints"""
     return [F_SINGLES.index(cardname) for cardname in cards]
 
 
-def quantities_to_cardnums(distribution) -> np.ndarray:
+def quantities_to_cardnums(distribution: np.ndarray) -> np.ndarray:
+    """input a reduced decklist like: [4 0 0 3 0 0 2 0 1 0 0 ... 2 ... 0], outputs a decklist of cardnums"""
     cardnums = []
     for index, quantity in enumerate(distribution):
         cardnums += [index]*round(quantity)
@@ -68,28 +64,25 @@ def decklist_from_path(path: str) -> list:
     return decklist
 
 
-def load_f_decks_from_local() -> list:
+def load_number_decks_from_local() -> list:
     """
     loads all formatted decklists as a list of lists of numbers
     """
     logging.info("loading decklists from local source")
     decklists = []
-    f_lists_dir = os.scandir(F_LISTS_DIR)
-    for archetype_obj in f_lists_dir:
-        archetype_dir = os.scandir(archetype_obj.path)
-        for decklist_obj in archetype_dir:
-            decklist = decklist_from_path(decklist_obj.path)
+    list_dir = os.scandir(F_LISTS_DIR)
+    for archetype_dir in list_dir:
+        archetype_dir = os.scandir(archetype_dir.path)
+        for decklist_file in archetype_dir:
+            decklist = decklist_from_path(decklist_file.path)
             # only keep length 60 lists
             # (we don't also want to have to predict the size of the list)
-            if len(decklist) == 60:
-                decklists.append(cardnames_to_nums(decklist))
-            else:
-                decklists.append(cardnames_to_nums(decklist[:60]))
+            decklists.append(card_names_to_nums(decklist[:60]))
     logging.info("decklists loaded, preprocessing data")
     return decklists
 
 
-def load_decks_from_bucket(bucket_name: str, data_folder: str):
+def load_decks_from_bucket(bucket_name: str, data_folder: str) -> list:
     logging.info("loading decklists from cloud")
     storage_client = storage.Client()
     bucket = storage_client.bucket(bucket_name)
@@ -97,12 +90,12 @@ def load_decks_from_bucket(bucket_name: str, data_folder: str):
     for blob in bucket.list_blobs(prefix=data_folder):
         list_as_text = blob.download_as_text()
         decklist = list_as_text.strip("\n").split("\n")
-        decklists.append(cardnames_to_nums(decklist[:60]))
+        decklists.append(card_names_to_nums(decklist[:60]))
     logging.info("decklists loaded")
     return decklists
 
 
-def load_f_singles_from_bucket(bucket_name: str, path_to_f_singles: str):
+def load_f_singles_from_bucket(bucket_name: str, path_to_f_singles: str) -> list:
     logging.info("loading formatted singles from cloud")
     storage_client = storage.Client()
     bucket = storage_client.bucket(bucket_name)
@@ -140,7 +133,7 @@ def get_aug_inputs_and_labels(decklists) -> XYData:
     return XYData(x=padded_inputs, y=reduced_categorical_labels)
 
 
-def process_labels(labels):
+def process_labels(labels) -> np.ndarray:
     labels = np.array(labels, dtype=np.float32)
     categorical_labels = tf.keras.utils.to_categorical(labels, num_classes=579)
     reduced_categorical_labels = tf.reduce_sum(categorical_labels, 1).numpy()
@@ -149,14 +142,17 @@ def process_labels(labels):
 
 def load_model(name: str = 'mymodel') -> tf.keras.models.Model:
     path_to_model = os.path.join(MODELS_DIR, name)
-    return tf.keras.models.load_model(path_to_model)
+    return tf.keras.models._load_model(path_to_model)
 
-F_SINGLES = load_f_singles()
-#F_SINGLES = load_f_singles_from_bucket(BUCKET_NAME, 'data/f_singles.txt')
-# UNF_SINGLES = load_unf_singles()
+
+if os.getenv('AIP_MODEL_DIR'):  # then we're probably on the cloud
+    F_SINGLES = load_f_singles_from_bucket(BUCKET_NAME, 'data/f_singles.txt')
+else:
+    F_SINGLES = load_f_singles()
+
 
 if __name__ == "__main__":
-    mydata = load_f_decks_from_local(BUCKET_NAME, 'data/f_lists')
+    mydata = load_number_decks_from_local()
     print(mydata)
     train, test, val = train_test_val_split(mydata)
     aug_train = get_aug_inputs_and_labels(train)

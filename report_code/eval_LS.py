@@ -5,7 +5,7 @@ import numpy as np
 import os
 import random
 
-LS = tf.keras.models.load_model("lstm_models/L1000S.h5")
+LS = tf.keras.models._load_model("lstm_models/L1000S.h5")
 # loads Word2Vec model
 wv = Word2Vec.load("w2v_models/m3.model")
 wv = wv.wv

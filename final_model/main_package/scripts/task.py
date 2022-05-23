@@ -1,30 +1,31 @@
 import os
 import logging
 import argparse
+from argparse import Namespace
 
 
 import tensorflow as tf
 
 from .model import FullARModel, compile_and_fit
 from .metadata import BUCKET_NAME, BUCKET_DATA_PREFIX
-from .utils import load_f_decks_from_local, load_decks_from_bucket, train_test_val_split, get_aug_inputs_and_labels,\
+from .utils import load_number_decks_from_local, load_decks_from_bucket, train_test_val_split, get_aug_inputs_and_labels,\
                    TrainTestValData
 
 
-def _build_cloud_model(args):
+def _build_cloud_model(args: Namespace):
     unprocessed_data = load_decks_from_bucket(BUCKET_NAME, BUCKET_DATA_PREFIX)
     prepared_data = _prepare_data(unprocessed_data)
     history = _make_train_save_model(prepared_data, args)
     _report_metric_to_google(args, history)
 
 
-def _build_local_model(args):
-    unprocessed_data = load_f_decks_from_local()
+def _build_local_model(args: Namespace):
+    unprocessed_data = load_number_decks_from_local()
     prepared_data = _prepare_data(unprocessed_data)
     _make_train_save_model(prepared_data, args)
 
 
-def _prepare_data(data):
+def _prepare_data(data: list):
     logging.info("preprocessing data")
     raw_train, raw_test, raw_val = train_test_val_split(data)
     all_data = TrainTestValData(
@@ -35,7 +36,7 @@ def _prepare_data(data):
     return all_data
 
 
-def _make_train_save_model(all_data, args):
+def _make_train_save_model(all_data: TrainTestValData, args: Namespace):
     logging.info("compiling and training model")
     model = FullARModel(num_units=args.num_units, extra_dense=args.extra_dense)
     history = compile_and_fit(model, all_data, epochs=args.num_epochs, batch_size=args.batch_size,
@@ -47,13 +48,13 @@ def _make_train_save_model(all_data, args):
     return history
 
 
-def _save_named_model(model, args):
+def _save_named_model(model: tf.keras.models.Model, args: Namespace):
     model_path = os.path.join(args.output_directory, args.model_name)
     tf.keras.models.save_model(model, model_path)
     logging.info('model saved in path: ', model_path)
 
 
-def _report_metric_to_google(args, history):
+def _report_metric_to_google(args: Namespace, history):
     import hypertune
     hypertuning_metric = max(history.history['val_matching_pairs_percent'])
     hpt = hypertune.HyperTune()
