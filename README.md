@@ -2,9 +2,11 @@
 ## This is a Magic: the Gathering decklist autocompletion tool
 ### Made by Julien Audet, not affiliated in any way to Magic: the Gathering nor to Wizards of the Coast
 
-This project is made as my CEGEP integrator project. It has been made in two versions over the course of 20 weeks and 100+ hours of research and work. A paper detailing the development process and results of the first version is available at: https://docs.google.com/document/d/1LHNd_-JQrEzRyDKt-MnAX0Gg7qHPufJPXdoyU1dHDbQ/edit?usp=sharing The second version was made to correct the problems of the first version and learn from those problems. 
+This project is made as my CEGEP integrator project. It has been made over the course of 20 weeks and 100+ hours of research and work. A paper detailing the development process and results of the first version is available at: https://docs.google.com/document/d/1LHNd_-JQrEzRyDKt-MnAX0Gg7qHPufJPXdoyU1dHDbQ/edit?usp=sharing. 
 
-## What's the project?
+This project aims to predict Magic: the Gathering decklists from subsets of those lists, as a player would do when facing an opponent.  
+The heart of this project is 
+
 I have picked a project based on a card game due to the simplicity of the data. I find it is much easier to work with data from a card game than say biomedical or environmental data. The goal of the project was to see how practical it was to apply Natural Language Processing (NLP) techniques to a card game to deduce strategic information. Specifically, vector embeddings and LSTM networks were used to predict MTG decklists from a subset of those lists. Results from the report suggest that although decklists often contain a majority of redundant card (and therefore that predicting previously seen cards yields suprizingly accurate results), the use of vector embedding and LSTM networks allows to predict more information while having access to much less information in the game. 
 
 
