@@ -5,11 +5,9 @@ from typing import List
 import requests
 from bs4 import BeautifulSoup
 
-MAX_LISTS_PER_ARCHETYPE = 100
+from config import PATH_TO_DATA_DIR, PATH_TO_UNFORMATTED_DECKLIST_DIR, PATH_TO_LINKS_DIR
 
-PATH_TO_DATA_DIR = f"{os.getcwd()}/../data_18_12_2023"
-PATH_TO_UNFORMATTED_DECKLIST_DIR = os.path.join(PATH_TO_DATA_DIR, "unformatted_decklists")
-PATH_TO_LINKS_DIR = os.path.join(PATH_TO_DATA_DIR, "links")
+MAX_LISTS_PER_ARCHETYPE = 100
 
 ARCHETYPES_TO_DOWNLOAD = {
     "crashing_footfalls": "https://www.mtggoldfish.com/archetype/modern-crashing-footfalls/decks",
