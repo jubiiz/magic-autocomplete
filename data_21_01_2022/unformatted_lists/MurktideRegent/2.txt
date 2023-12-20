@@ -1,0 +1,52 @@
+2 Arid Mesa
+1 Blood Crypt
+1 Bloodstained Mire
+1 Brazen Borrower
+1 Cling to Dust
+1 Consider
+1 Counterspell
+1 Darkslick Shores
+1 Dragon's Rage Channeler
+1 Dress Down
+1 Drown in the Loch
+1 Expressive Iteration
+1 Fatal Push
+1 Flooded Strand
+1 Force of Negation
+1 Fury
+1 Hallowed Fountain
+1 Inquisition of Kozilek
+1 Island
+1 Jace, Vryn's Prodigy
+1 Jace, the Mind Sculptor
+1 Kaya's Guile
+1 Kolaghan's Command
+1 Kroxa, Titan of Death's Hunger
+1 Lightning Bolt
+1 Lightning Helix
+1 Logic Knot
+1 Mana Leak
+1 Memory Deluge
+1 Mountain
+1 Murktide Regent
+1 Opt
+4 Polluted Delta
+1 Prismari Command
+1 Prismatic Ending
+1 Ragavan, Nimble Pilferer
+1 Raugrin Triome
+1 Sacred Foundry
+4 Scalding Tarn
+1 Seasoned Pyromancer
+1 Serum Visions
+1 Snapcaster Mage
+1 Soul-Guide Lantern
+2 Spirebluff Canal
+1 Steam Vents
+1 Subtlety
+1 Teferi, Hero of Dominaria
+1 Teferi, Time Raveler
+1 Terminate
+1 Thoughtseize
+1 Unholy Heat
+1 Watery Grave
