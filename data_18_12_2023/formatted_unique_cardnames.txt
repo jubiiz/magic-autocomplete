@@ -560,7 +560,6 @@ solemn_simulacrum
 solitude
 sorcerous_spyglass
 soul_guide_lantern
-souls_of_the_lost
 spara_s_headquarters
 spell_burst
 spell_pierce
