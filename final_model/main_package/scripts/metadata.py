@@ -6,14 +6,14 @@ len(F_SINGLES) = 579 because padding_cardname
 """
 import os
 
-ROOT_DIR = 'U:\documents\loisirs\programmation\PI-MA\magic-autocomplete'  # get out of the three packages
+ROOT_DIR = '/home/jubiiz/documents/code/magic-autocomplete'  # get out of the three packages
 CURRENT_DIR = os.path.join(ROOT_DIR, 'final_model')
 
-DATA_DIR = os.path.join(ROOT_DIR, 'data')
-F_LISTS_DIR = os.path.join(DATA_DIR, 'f_lists')
+DATA_DIR = os.path.join(ROOT_DIR, 'data_21_01_2022')
+F_LISTS_DIR = os.path.join(DATA_DIR, 'formatted_lists')
 F_SINGLES_PATH = os.path.join(DATA_DIR, 'f_singles.txt')
-UNF_LISTS_DIR = os.path.join(DATA_DIR, 'unf_lists')
-UNF_SINGLES_PATH = os.path.join(DATA_DIR, 'unf_singles.txt')
+UNF_LISTS_DIR = os.path.join(DATA_DIR, 'unformatted_lists')
+UNF_SINGLES_PATH = os.path.join(DATA_DIR, 'uf_singles.txt')
 TEST_INPUTS_DIR = os.path.join(CURRENT_DIR, 'test_inputs')
 
 VOCAB_SIZE = 579  # because of the extra 1 card

@@ -57,7 +57,6 @@ def _display_prediction(input_card_numbers, prediction):
 def main():
     model = _load_model('best_19')
     _predict_decklist_from_file(model=model, filename='test0.txt')
-
     print("Done.")
 
 
