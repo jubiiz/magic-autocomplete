@@ -3,8 +3,19 @@ import tensorflow as tf
 import numpy as np
 
 LS = tf.keras.models.load_model("../../models/lstm_2022/L1000S.h5")
-# loads Word2Vec model
 wv = Word2Vec.load("../../models/w2v/m3_2022.model").wv
+
+
+def main():
+    decklist_subset = load_list("decklist_subset.txt")
+    target_decklist = load_list("target_decklist.txt")
+    cpu_prediction = list_from_LV(decklist_subset)
+    cpu_accuracy = get_accuracy(cpu_prediction, target_decklist)
+
+    print("information available: ", decklist_subset)
+    print("\ntarget: ", target_decklist)
+    print("\ncpu prediction: ", "\n".join(sorted(cpu_prediction)))
+    print("\ncpu_accuracy: ", cpu_accuracy)
 
 
 def load_formatted_singles():
@@ -90,18 +101,6 @@ def get_accuracy(prediction, target):
             score += 1
             target.remove(card) 
     return(score/len_target)
-
-
-def main():
-    decklist_subset = load_list("decklist_subset.txt")
-    target_decklist = load_list("target_decklist.txt")
-    cpu_prediction = list_from_LV(decklist_subset)
-    cpu_accuracy = get_accuracy(cpu_prediction, target_decklist)
-
-    print("information available: ", decklist_subset)
-    print("\ntarget: ", target_decklist)
-    print("\ncpu prediction: ", "\n".join(sorted(cpu_prediction)))
-    print("\ncpu_accuracy: ", cpu_accuracy)
 
 
 if __name__ == "__main__":
