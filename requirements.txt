@@ -1,4 +1,9 @@
 beautifulsoup4==4.12.2
 gensim==4.3.2
+google-cloud==0.34.0
+google-cloud-storage==2.14.0
+keras==2.15.0
 numpy==1.26.2
 requests==2.31.0
+skikit-learn==1.3.2
+tensorflow==2.15.0

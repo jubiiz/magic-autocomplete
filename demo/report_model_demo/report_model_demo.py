@@ -1,35 +1,36 @@
 from gensim.models import Word2Vec
-from matplotlib import pyplot as plt
 import tensorflow as tf
 import numpy as np
-import os
-import random
 
-LS = tf.keras.models._load_model("../lstm_models/L1000S.h5")
-# loads Word2Vec model
-wv = Word2Vec.load("../w2v_models/m3.model")
-wv = wv.wv
+LS = tf.keras.models.load_model("../../models/lstm_2022/L1000S.h5")
+wv = Word2Vec.load("../../models/w2v/m3_2022.model").wv
 
-def load_conversion():
+
+def main():
+    decklist_subset = load_list("decklist_subset.txt")
+    target_decklist = load_list("target_decklist.txt")
+    cpu_prediction = list_from_LV(decklist_subset)
+    cpu_accuracy = get_accuracy(cpu_prediction, target_decklist)
+
+    print("information available: ", decklist_subset)
+    print("\ntarget: ", target_decklist)
+    print("\ncpu prediction: ", "\n".join(sorted(cpu_prediction)))
+    print("\ncpu_accuracy: ", cpu_accuracy)
+
+
+def load_formatted_singles():
     # returns a conversion table of shape {f_name: uf_name}
-    f_temp = []
-    uf_temp = []
-    with open("../f_singles.txt", "r") as r:
+    formatted_singles = []
+    with open("../../data_21_01_2022/f_singles.txt", "r") as r:
         for line in r:
             line = line.rstrip("\n")
-            f_temp.append(line)
-        
-    with open("../uf_singles.txt", "r") as r:
-        for line in r:
-            line = line.rstrip("\n")
-            uf_temp.append(line)
+            formatted_singles.append(line)
+    return formatted_singles
 
-    conversion = dict(zip(f_temp, uf_temp))
-    return(conversion)
 
-CONVERSION = load_conversion()
-F_SINGLES = list(CONVERSION.keys())
+F_SINGLES = load_formatted_singles()
 PRED_INDEXES = list(range(len(F_SINGLES)))
+
 
 def card_from_LS(known_names, known_vecs, correction): 
     """
@@ -37,7 +38,7 @@ def card_from_LS(known_names, known_vecs, correction):
     outputs a next card name and next card vector
     applies correction if "correction" is True
     """
-    zeros = [[0.]*64]*(60)
+    zeros = [[0.]*64]*60
     # prepare input
     if len(known_names) < 59:
         input_data = np.concatenate([zeros[:59-len(known_vecs)], known_vecs])
@@ -85,7 +86,7 @@ def load_list(filename):
         for line in r:
             line = line.rstrip("\n")
             cards.append(line)
-    return(cards)
+    return cards
 
 def get_accuracy(prediction, target):
     """
@@ -100,55 +101,6 @@ def get_accuracy(prediction, target):
             score += 1
             target.remove(card) 
     return(score/len_target)
-
-
-
-def main():
-    info = ["""\
-brazen_borrower
-striped_riverwinder
-botanical_sanctum
-striped_riverwinder
-botanical_sanctum
-brazen_borrower
-grief
-scalding_tarn
-misty_rainforest
-scalding_tarn""", """\
-wrenn_and_six
-mountain
-overgrown_tomb
-lightning_bolt
-elvish_reclaimer
-fatal_push
-urzas_saga
-fatal_push
-ragavan_nimble_pilferer
-ragavan_nimble_pilferer""", """\
-arboreal_grazer
-amulet_of_vigor
-arboreal_grazer
-vesuva
-castle_garenbrig
-forest
-misty_rainforest
-summoners_pact
-urzas_saga
-amulet_of_vigor"""]
-    input = info[2].split("\n")
-    user_prediction = load_list("p3.txt")
-    target = load_list("a3.txt")    
-    user_accuracy = get_accuracy(user_prediction, target)
-    cpu_prediction = list_from_LV(input)
-    cpu_accuracy = get_accuracy(cpu_prediction, target)
-
-    print("information available: ", info[2])
-    print("\ntarget: ", target)
-    print("\nuser prediction: ", user_prediction)
-    print("\nuser accuracy: ", user_accuracy)
-    print("\ncpu prediction: ", cpu_prediction)
-    print("\ncpu_accuracy: ", cpu_accuracy)
-
 
 
 if __name__ == "__main__":
