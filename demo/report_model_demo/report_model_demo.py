@@ -1,35 +1,26 @@
 from gensim.models import Word2Vec
-from matplotlib import pyplot as plt
 import tensorflow as tf
 import numpy as np
-import os
-import random
 
-LS = tf.keras.models._load_model("../lstm_models/L1000S.h5")
+LS = tf.keras.models.load_model("../lstm_models/L1000S.h5")
 # loads Word2Vec model
 wv = Word2Vec.load("../w2v_models/m3.model")
 wv = wv.wv
 
-def load_conversion():
+
+def load_formatted_singles():
     # returns a conversion table of shape {f_name: uf_name}
-    f_temp = []
-    uf_temp = []
-    with open("../f_singles.txt", "r") as r:
+    formatted_singles = []
+    with open("../../data_21_01_2022/f_singles.txt", "r") as r:
         for line in r:
             line = line.rstrip("\n")
-            f_temp.append(line)
-        
-    with open("../uf_singles.txt", "r") as r:
-        for line in r:
-            line = line.rstrip("\n")
-            uf_temp.append(line)
+            formatted_singles.append(line)
+    return formatted_singles
 
-    conversion = dict(zip(f_temp, uf_temp))
-    return(conversion)
 
-CONVERSION = load_conversion()
-F_SINGLES = list(CONVERSION.keys())
+F_SINGLES = load_formatted_singles()
 PRED_INDEXES = list(range(len(F_SINGLES)))
+
 
 def card_from_LS(known_names, known_vecs, correction): 
     """
@@ -102,7 +93,6 @@ def get_accuracy(prediction, target):
     return(score/len_target)
 
 
-
 def main():
     info = ["""\
 brazen_borrower
@@ -148,7 +138,6 @@ amulet_of_vigor"""]
     print("\nuser accuracy: ", user_accuracy)
     print("\ncpu prediction: ", cpu_prediction)
     print("\ncpu_accuracy: ", cpu_accuracy)
-
 
 
 if __name__ == "__main__":
