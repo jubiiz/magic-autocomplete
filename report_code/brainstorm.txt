@@ -1,0 +1,40 @@
+brainstorm file for the project
+
+todo:
+- learn how to vectorize non-numeric input
+- create list of unique cards?
+- create vectorized inputs from lists
+- learn how to create and use LSTM networks from Tensorflow
+- build and train model on formated lists
+- predict lists
+
+decklist format: 
+    - one card per line
+    - all lower cap
+    - spaces as "_"
+    - randomized
+    X no sb 
+
+
+input vectorization: 
+    probably with word2vec CBOW: https://www.youtube.com/watch?v=UqRCEmrv1gQ 
+        - faster and better for small corpuses (source to find)
+
+    probable method:
+    - load list of all lists into memory, each individual card being a list item
+    model = Word2Vec(modern_meta, min_count=1, size=16)
+
+    model 0, vsize 16, doesnt capture card proximity well... almost no related cards in the "close" ones
+    model 1, vsize 32, captures it a bit better, a few related cards in similar
+    model 2, vsize 128 20 epochs, maybe overtrained (after 2100 epochs: lol nah)
+    
+
+SPECIFICATIONS:
+will not deal with sideboarding
+decks sourced from : mtggoldfish
+
+
+
+
+
+
